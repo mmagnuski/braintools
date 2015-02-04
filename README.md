@@ -39,8 +39,9 @@ gr = wh * 0.7;
 
 Now, let's plot a topoplot:
 ```matlab
-topoplot(val, EEG.chanlocs([1:61, 64])); % we are not using
+topoplot(val, EEG.chanlocs([1:61, 64])); % we are not using cheek electrodes
 ```
+![alt tag](https://raw.githubusercontent.com/mmagnuski/braintools/master/docs/pics/Ex01_01.PNG)
 
 Then we use topo_scrapper and see what it brings to the table:
 ```
@@ -93,3 +94,4 @@ line(...
     'markersize', 23 ...
 );
 ```
+![alt tag](https://raw.githubusercontent.com/mmagnuski/braintools/master/docs/pics/Ex01_02.png)
