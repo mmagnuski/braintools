@@ -1,5 +1,5 @@
 # braintools
-Heterogenious pack of tools helpful in analysis of brain signals.
+Heterogeneous pack of tools helpful in analysis of brain signals.
 
 ## using `topo_scrapper`
 To have flexible control over your topoplot (eeglab function) figure it is useful to get handles to topoplot elements. `topo_scrapper` dives into your topoplot and returns you handles to its elements.
