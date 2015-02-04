@@ -65,7 +65,7 @@ We want to draw the electrodes our way, so we delete default electrode markers:
 ```matlab
 delete(topo.elec_marks);
 ```
-Now we plot our 0.05 - 0.01 electrodes in grey. 
+Now we plot our 0.05 - 0.01 electrodes in gray. 
 We first create `elecs` vector that says which electrodes are within 0.05 - 0.01 pval range 
 and then use `line` function to plot invisible line with visible markers (kind of confusing, 
 I know, you can use `scatter` too). `topo_scrapper` gave us electrode positions in the 
