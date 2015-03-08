@@ -1,5 +1,5 @@
 # braintools
-Heterogenious pack of tools helpful in analysis of brain signals.
+Heterogeneous pack of tools helpful in analysis of brain signals.
 
 ## using `topo_scrapper`
 To have flexible control over your topoplot (eeglab function) figure it is useful to get handles to topoplot elements. `topo_scrapper` dives into your topoplot and returns you handles to its elements.
@@ -39,8 +39,9 @@ gr = wh * 0.7;
 
 Now, let's plot a topoplot:
 ```matlab
-topoplot(val, EEG.chanlocs([1:61, 64])); % we are not using
+topoplot(val, EEG.chanlocs([1:61, 64])); % we are not using cheek electrodes
 ```
+![alt tag](https://raw.githubusercontent.com/mmagnuski/braintools/master/docs/pics/Ex01_01.PNG)
 
 Then we use topo_scrapper and see what it brings to the table:
 ```
@@ -64,7 +65,7 @@ We want to draw the electrodes our way, so we delete default electrode markers:
 ```matlab
 delete(topo.elec_marks);
 ```
-Now we plot our 0.05 - 0.01 electrodes in grey. 
+Now we plot our 0.05 - 0.01 electrodes in gray. 
 We first create `elecs` vector that says which electrodes are within 0.05 - 0.01 pval range 
 and then use `line` function to plot invisible line with visible markers (kind of confusing, 
 I know, you can use `scatter` too). `topo_scrapper` gave us electrode positions in the 
@@ -83,13 +84,15 @@ line(...
 ```
 Then we plot the electrodes with pval below 0.01 in white:
 ```matlab
+elecs = elec_pval < 0.01;
 line(...
     topo.elec_pos(elecs, 1), ...
     topo.elec_pos(elecs, 2), ...
     topo.elec_pos(elecs, 3), ...
     'marker', '.', ...
     'linestyle', 'none', ...
-    'markeredgecolor', gr, ...
+    'markeredgecolor', wh, ...
     'markersize', 23 ...
 );
 ```
+![alt tag](https://raw.githubusercontent.com/mmagnuski/braintools/master/docs/pics/Ex01_02.png)
