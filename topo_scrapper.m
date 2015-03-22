@@ -17,6 +17,7 @@ lns = chld(strcmp('line', tps));
 lnstl = get(lns, 'linestyle'); 
 elcs = strcmp('none', lnstl);
 shps = find(~elcs); elcs = find(elcs);
+ptch = find(strcmp(tps, 'patch'));
 
 % at the top are electrode markers
 h.elec_marks   = chld(elcs(1));
@@ -26,7 +27,13 @@ end
 h.left_ear     = chld(shps(1));
 h.right_ear    = chld(shps(2));
 h.nose         = chld(shps(3));
-h.head         = chld(shps(4));
+
+if length(shps) > 3
+    h.head         = chld(shps(4));
+else
+    h.head = chld(ptch(1));
+    ptch(1) = [];
+end
 
 % get electrode positions:
 flds = {'elec_pos', 'elec_pos2'; ...
@@ -45,8 +52,8 @@ h.one_elec_group = length(elcs) == 1;
 h.title       = get(ax, 'title');
 
 % patch and hggroup:
-h.patch = chld(find(strcmp('patch', tps)));
-h.hggroup = chld(find(strcmp('hggroup', tps)));
+h.patch = chld(ptch(1));
+h.hggroup = chld(strcmp('hggroup', tps));
 
 % may be interesting to disect the hggroup into 
 % contour and image etc...
