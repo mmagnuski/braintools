@@ -59,5 +59,13 @@ else
 end
 h.hggroup = chld(strcmp('hggroup', tps));
 
+% check text labels:
+tmp = findobj('parent', ax, 'type', 'text');
+if ~isempty(tmp)
+    h.elec_labels = tmp;
+else
+    h.elec_labels = [];
+end
+
 % may be interesting to disect the hggroup into 
 % contour and image etc...
