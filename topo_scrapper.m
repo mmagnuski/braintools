@@ -52,7 +52,11 @@ h.one_elec_group = length(elcs) == 1;
 h.title       = get(ax, 'title');
 
 % patch and hggroup:
-h.patch = chld(ptch(1));
+if ~isempty(ptch)
+    h.patch = chld(ptch(1));
+else
+    h.patch = [];
+end
 h.hggroup = chld(strcmp('hggroup', tps));
 
 % may be interesting to disect the hggroup into 
