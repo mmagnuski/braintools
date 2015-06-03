@@ -59,17 +59,22 @@ classdef project < handle
                 end
             else
                 if isfield(obj.paths, label)
-                    pth = obj.paths.(label);
-                    if length(pth) == 1
-                        pth = pth{1};
-                    end
+                    pth = get_valid_path(obj.paths.(label));
                 end
             end
         end
         
         function cd(obj, label)
             if isfield(obj.paths, label)
-                cd(obj.paths.(label){1});
+                cd(get_valid_path(obj.paths.(label)));
+            end
+        end
+        
+        function op(obj, label)
+            % open given folder in windows explorer
+            % (currently works only in windows)
+            if isfield(obj.paths, label)
+                winopen(get_valid_path(obj.paths.(label)));
             end
         end
     end
