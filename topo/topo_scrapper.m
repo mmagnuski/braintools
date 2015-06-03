@@ -3,9 +3,33 @@ function h = topo_scrapper(ax)
 % TOPO_SCRAPPER disects EEGlab's topoplot axis structure
 % and exposes handles to easily navigate and manipulate
 % parts of the topoplot
+%
+% input
+% -----
+% ax - handle to the topoplot's axis
+%
+% output
+% ------
+% h  - structure of (mostly) handles to topoplot 
+%      graphical elements. Contains following fields:
+%  .elec_marks - FIXHELPINFO
+%  .left_ear
+%  .right_ear
+%  .nose
+%  .head
+%  .title
+%  .patch
+%  .hggroup
+%  .text
+%  .elec_labels
+%  .label
 % 
-% warning! this works correct for normal filled
-% topoplot (was not tested for other topoplot types)
+% example
+% -------
+% removing the nose:
+%     topoplot(values, EEG.chanlocs);
+%     tp = topo_scrapper(gca);
+%     delete(tp.nose);
 
 
 % get children:
@@ -20,16 +44,16 @@ shps = find(~elcs); elcs = find(elcs);
 ptch = find(strcmp(tps, 'patch'));
 
 % at the top are electrode markers
-h.elec_marks   = chld(elcs(1));
+h.elec_marks   = lns(elcs(1));
 if length(elcs) > 1
-	h.elec_marks2  = chld(elcs(2));
+	h.elec_marks2  = lns(elcs(2));
 end
-h.left_ear     = chld(shps(1));
-h.right_ear    = chld(shps(2));
-h.nose         = chld(shps(3));
+h.left_ear     = lns(shps(1));
+h.right_ear    = lns(shps(2));
+h.nose         = lns(shps(3));
 
 if length(shps) > 3
-    h.head         = chld(shps(4));
+    h.head         = lns(shps(4));
 else
     h.head = chld(ptch(1));
     ptch(1) = [];
@@ -62,7 +86,13 @@ h.hggroup = chld(strcmp('hggroup', tps));
 % check text labels:
 tmp = findobj('parent', ax, 'type', 'text');
 if ~isempty(tmp)
-    h.elec_labels = tmp;
+    h.text = tmp(end-1:end);
+    if length(tmp) > 2
+        h.elec_labels = tmp(1:end-2);
+        h.label = get(h.elec_labels, 'string');
+        h.label = cellfun(@deblank, h.label, ...
+            'UniformOutput', false);
+    end
 else
     h.elec_labels = [];
 end
