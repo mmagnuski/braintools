@@ -27,16 +27,22 @@ else
         
         num = false;
     else
-        error('Electrodes are neither numeric, character or cell :(')
+        error('Electrodes are neither numeric, character nor cell :(')
     end
 end
 
 % both EEGlab and FieldTrip structures
-% are allowable
+% are allowable, as well as cell array of strings
+if isstruct(EEG)
 if femp(EEG, 'chanlocs')
     lb = {EEG.chanlocs.labels};
 elseif femp(EEG, 'label')
     lb = EEG.label;
+end
+elseif iscell(EEG)
+    lb = EEG;
+else
+    error('Unrecognized first input.')
 end
 
 if ~num
