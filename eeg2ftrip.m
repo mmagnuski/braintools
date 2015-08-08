@@ -85,7 +85,9 @@ switch fieldbox
                   EEG.epoch(index).eventlatency), 1, 'first');
               zeroev = EEG.epoch(index).eventurevent{zeroev};
           end
-          
+          if iscell(zeroev)
+              zeroev = zeroev{1};
+          end
           if ~(zeroev > length(EEG.urevent))
               noepinf = false;
           origlat = EEG.urevent(zeroev).latency;

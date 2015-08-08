@@ -1,11 +1,17 @@
-function setfun(pth, fun, varargin)
+function out = setfun(pth, fun, varargin)
 
 % loads .set files from given path one by one
-% applies function fun to them and overwrites
+% applies function fun to them
+%
+% examples
+% --------
+% chan_mean = @(EEG) mean(EEG.data, 2);
+% all_chan_means = setfun('C:\DATA\EEG', chan_mean);
 
 
 % defaults
 overwrite = false;
+out = {};
 
 % check opts:
 if any(strcmp('overwrite', varargin))
@@ -26,7 +32,7 @@ for f = 1:length(fls)
 	if overwrite
 		EEG = feval(fun, EEG);
 	else
-		feval(fun, EEG);
+		out{f} = feval(fun, EEG);
 	end
 
 	% overwrite
