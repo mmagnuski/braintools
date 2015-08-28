@@ -1,7 +1,11 @@
 function erp = give_erp(EEG, chans, epoki, varargin)
 
-% ERPY_DAJ pozwala uzyskać potencjały wywołane
-% z danych EEG dla wybranych kanałów i epok
+% GIVE_ERP computes Event Related Potentials
+% for chosen channels and epochs
+%
+% example:
+% erp = give_erp(EEG, {'E23', 'E45'}, 'face');
+% erp = give_erp(EEG, [1, 2, 5], 'car', 'ica');
 
 iscomp = any(strcmp('ica', varargin));
 
@@ -14,6 +18,9 @@ end
 if ~exist('epoki', 'var') || isempty(epoki)
     epoki = 1:EEG.trials;
 end
+if ischar(epoki)
+    epoki = {epoki};
+end
 
 % jeżeli kanały podane zostały po nazwach 
 if ischar(chans)
@@ -24,7 +31,7 @@ if iscell(chans)
 end
 
 % jeżeli podano epoki jako nazwę warunku
-if ischar(epoki)
+if ischar(epoki) || iscell(epoki)
 	[temp, epoki] = find(epoch_centering_events(EEG, epoki));
 end
 
