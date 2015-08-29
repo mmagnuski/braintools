@@ -1,5 +1,23 @@
 function stat = cluster_correct_ttest2(data, orig_cond, chan_nb, n_perm)
 
+% cluster_correct_ttest2(data, orig_cond, chan_nb, n_perm)
+% computes cluster-correction (Maris, Oostenveld, 2007)
+% on between subjects data
+% 
+%
+% inputs
+% ------
+% data - subjects by dims
+% orig_cond - original conditions that subjects belong to
+% chan_nb - channel neighbourhood
+% n_perm  - number of permutations
+%
+% outputs
+% -------
+% stat    - FieldTrip compatible stat structure
+%
+% see also: cluster_this
+
 if ~exist('n_perm', 'var')
     n_perm = 1000;
 end
@@ -10,7 +28,7 @@ shuffle = @(x) x(randperm(length(x), length(x)));
 
 neg_dist = zeros(n_perm, 1);
 pos_dist = zeros(n_perm, 1);
-for i = 1:n_perm + 1
+for i = 1:n_perm
     cond = shuffle(orig_cond);
 
     [~, p, ~, stat] = ttest2(data(cond,:), ...
@@ -21,7 +39,7 @@ for i = 1:n_perm + 1
     % test for reshape
     if needs_reshape
         t_prm = reshape(t_prm, orig_size(2:end));
-        p_prm = reshape(t_prm, orig_size(2:end));
+        p_prm = reshape(p_prm, orig_size(2:end));
     end
     if size(p_prm, 1) == 1 && length(size(p_prm)) < 3
         p_prm = p_prm(:);
@@ -58,7 +76,7 @@ p_prm = squeeze(p(1,:));
 % test for reshape
 if needs_reshape
     t_prm = reshape(t_prm, orig_size(2:end));
-    p_prm = reshape(t_prm, orig_size(2:end));
+    p_prm = reshape(p_prm, orig_size(2:end));
 end
 if size(p_prm, 1) == 1 && length(size(p_prm)) < 3
     p_prm = p_prm(:);
@@ -72,15 +90,17 @@ vals = compute_cluster_val(clst, t_prm, @sum);
 % --------------
 clst_p = zeros(1, length(vals));
 
-% pos
+% pos and neg
 pos = vals > 0;
-clst_p(pos) = arrayfun(@(x) mean(x > pos_dist) * 2, ...
+clst_p(pos) = arrayfun(@(x) mean(x < pos_dist) * 2, ...
     vals(pos));
 neg = vals < 0;
-clst_p(neg) = arrayfun(@(x) mean(x < neg_dist) * 2, ...
+clst_p(neg) = arrayfun(@(x) mean(x > neg_dist) * 2, ...
     vals(neg));
 
 
+stat = [];
 stat.clusterlabelmat = clst;
 stat.tvalue = vals;
 stat.pvalue = clst_p;
+stat.stat = t_prm;
