@@ -12,12 +12,13 @@ cfg.correctm   = 'cluster';
 cfg.method     = 'montecarlo';
 % cfg.neighbours = neighb;
 % cfg.frequency  = [7, 13];
-cfg.minnbchan = 1;               
+cfg.minnbchan = 0;               
 
 cfg.numrandomization = 1000;
 cfg.correctm         = 'cluster';
-cfg.alpha            = 0.025;
-cfg.clusteralpha     = 0.05;   
+cfg.alpha            = 0.05;
+cfg.clusteralpha     = 0.05;
+cfg.correcttail      = 'prob';
 cfg.clusterstatistic = 'maxsum'; 
 cfg.statistic        = 'indepsamplesT';
 cfg.tail             = 0;
