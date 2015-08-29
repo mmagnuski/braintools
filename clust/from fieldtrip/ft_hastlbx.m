@@ -1,4 +1,4 @@
-function [status] = ft_hastoolbox(toolbox, autoadd, silent)
+function [status] = ft_hastlbx(toolbox, autoadd, silent)
 
 % FT_HASTOOLBOX tests whether an external toolbox is installed. Optionally
 % it will try to determine the path to the toolbox and install it
