@@ -38,7 +38,9 @@ if ~isempty(signif)
 		clst(s).edges    = clst(s).samples([1, end]);
 		clst(s).timedges = clst(s).time([1, end]);
 		clst(s).elecs    = find(sum(clst(s).boolmat > 0, 2));
-		clst(s).label    = stat.label(clst(s).elecs);
+        try
+            clst(s).label    = stat.label(clst(s).elecs);
+        end
 	end
 else
 	clst = [];
