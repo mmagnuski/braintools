@@ -34,13 +34,18 @@ if ~isempty(signif)
 		clst(s).boolmat  = stat.(fldmat) == signif(s);
 		clst(s).samples  = find(sum(clst(s).boolmat > 0, 1));
 		clst(s).nsamp    = length(clst(s).samples);
-		clst(s).time     = stat.time(clst(s).samples);
 		clst(s).edges    = clst(s).samples([1, end]);
-		clst(s).timedges = clst(s).time([1, end]);
 		clst(s).elecs    = find(sum(clst(s).boolmat > 0, 2));
+
+        % chan labels
         try
             clst(s).label    = stat.label(clst(s).elecs);
         end
+        % time labels
+        try
+            clst(s).time     = stat.time(clst(s).samples);
+            clst(s).timedges = clst(s).time([1, end]);
+        end 
 	end
 else
 	clst = [];
