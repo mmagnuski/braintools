@@ -1,8 +1,8 @@
 function [pos, neg] = cluster_this(data, thresh, chanconn)
 
+% TODO
 % if thresh is a matrix the same size as data:
 % - use it as a p-value map and look for < 0.05
-% TODO
 
 % cluster positive eff
 pos = data > thresh;
