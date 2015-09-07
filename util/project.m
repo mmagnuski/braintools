@@ -77,6 +77,26 @@ classdef project < handle
                 winopen(get_valid_path(obj.paths.(label)));
             end
         end
+        
+        function out = subsref(obj, s)
+            methodnames = {'op', 'protect', 'cl', 'cd', 'pth', 'addp'};
+            output = logical([0, 0, 0, 0, 1, 0]);
+            if length(s) == 1 && strcmp(s.type, '()')
+                if isfield(obj.paths, s.subs{1})
+                    out = get_valid_path(obj.paths.(s.subs{1}));
+                end
+            elseif strcmp(s(1).type, '.') && ~iscell(s(1).subs) && ...
+                    any(strcmp(s(1).subs, methodnames))
+                whichmethod = strcmp(s(1).subs, methodnames);
+                if output(whichmethod)
+                    out = eval([s(1).subs, '(obj, s(2).subs{:});']);
+                else
+                    eval([s(1).subs, '(obj, s(2).subs{:});']);
+                end
+            else
+                out = builtin('subsref', obj, s);
+            end
+        end
     end
     
 end
