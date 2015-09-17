@@ -1,4 +1,5 @@
-function varargout = cluster_from_folders(pth, chanconn, effect_name, varargin)
+function varargout = cluster_from_folders(pth, chanconn, ...
+    effect_name, varargin)
 
 % stat = cluster_from_folders(pth, chanconn, effect_name)
 % CLUSTER_FROM_FOLDERS clusters data scattered across permutation folders
@@ -55,6 +56,7 @@ stat = cell(num_effects, 1);
 
 % cluster permutations
 % --------------------
+tx_len = 0;
 holms_iter = 0;
 holms_continue = true;
 any_significant = true(num_effects, 1);
@@ -84,11 +86,18 @@ while holms_continue
                     cluster_this(data{ef}, 2, chanconn);
             end
         end
+        if tx_len > 0
+            fprintf(1, [repmat('\b', 1, tx_len)]);
+        end
         if opt.holms
             tx = sprintf('holms iteration %d, permutation %d\n', ...
                 holms_iter, n);
+            tx_len = length(tx);
+            fprintf(1, tx);
         else
-            fprintf('%d\n', n);
+            tx = sprintf('permutation %d\n', n);
+            tx_len = length(tx);
+            fprintf(1, tx);
         end
     end
     
