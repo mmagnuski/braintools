@@ -33,10 +33,13 @@ negdist = zeros(num_perm, num_effects);
 
 
 % channels used in the model:
-elec = cell(62,1);
+elec = cell(64,1);
 el = 1:64;
+if size(chanconn, 1) == 62
+elec = cell(62,1);
 el([62, 63]) = [];
-for e = 1:62
+end
+for e = 1:length(el)
     elec{e} = ['E', num2str(el(e))];
 end
 
