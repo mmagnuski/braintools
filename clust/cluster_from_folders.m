@@ -28,24 +28,24 @@ for e = 1:62
     elec{e} = ['E', num2str(el(e))];
 end
 
-% Holmes
-opt.holmes = false;
+% Holms
+opt.holms = false;
 if ~isempty(varargin)
     opt = parse_arse(varargin, opt);
 end
-if opt.holmes
+if opt.holms
     h_stat = cell(num_effects, 1);
 end
 stat = cell(num_effects, 1);
 
 % cluster permutations
 % --------------------
-holmes_iter = 0;
-holmes_continue = true;
+holms_iter = 0;
+holms_continue = true;
 any_significant = true(num_effects, 1);
 
-while holmes_continue
-    holmes_iter = holmes_iter + 1;
+while holms_continue
+    holms_iter = holms_iter + 1;
     for n = 1:num_perm
         data = read_model_data(fullfile(pth, ['perm', num2str(n)]), ...
             elec);
@@ -53,16 +53,17 @@ while holmes_continue
         for ef = 1:num_effects
             
             if any_significant(ef)
-                % Holmes correction
-                if opt.holmes && holmes_iter > 1
+                % holms correction
+                if opt.holms && holms_iter > 1
                     data{ef}(h_stat{ef}.mask) = 0;
                 end
                 [posdist(n, ef), negdist(n, ef)] = ...
                     cluster_this(data{ef}, 2, chanconn);
             end
         end
-        if opt.holmes
-            fprintf('holmes iteration %d, permutation %d\n', holmes_iter, n);
+        if opt.holms
+            tx = sprintf('holms iteration %d, permutation %d\n', ...
+                holms_iter, n);
         else
             fprintf('%d\n', n);
         end
@@ -73,28 +74,28 @@ while holmes_continue
     
     % cluster effects
     for ef = find(any_significant)'
-        % Holmes correction
-        if opt.holmes && holmes_iter > 1
+        % holms correction
+        if opt.holms && holms_iter > 1
             data{ef}(h_stat{ef}.mask) = 0;
         end
         
         stat{ef} = cluster_main(data{ef}, chanconn, ...
             posdist(:,ef), negdist(:,ef));
         
-        if opt.holmes
+        if opt.holms
             % check for positive and negative significant clusters:
-            [h_stat{ef}, any_significant(ef)] = holmes_correct(stat{ef}, ...
+            [h_stat{ef}, any_significant(ef)] = holms_correct(stat{ef}, ...
                 h_stat{ef});
         end
     end
-    if opt.holmes
-        holmes_continue = any(any_significant);
+    if opt.holms
+        holms_continue = any(any_significant);
     else
-        holmes_continue = false;
+        holms_continue = false;
     end
 end
 % [stat.effect] = deal(effect_name{:});
-if opt.holmes
+if opt.holms
     varargout{1} = h_stat;
     varargout{2} = stat;
 else
