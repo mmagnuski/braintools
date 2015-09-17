@@ -5,14 +5,26 @@ function varargout = cluster_from_folders(pth, chanconn, effect_name, varargin)
 
 
 % dirnames:
-ls = dir(pth);
-dirs = ls([ls.isdir]);
+lst = dir(pth);
+dirs = lst([lst.isdir]);
 nums = regexp({dirs.name}, '[0-9]+', 'match', 'once');
 nums = nums(~cellfun(@isempty, nums));
-num_perm = max(cellfun(@str2num, nums));
+if ~isempty(nums)
+    % electrode csv are scattered in folders
+    indir = true;
+    nums = cellfun(@str2num, nums);
+else
+    % each permutation is a separate .mat file
+    indir = false;
+    [~, tok] = regexp({lst.name}, 'perm([0-9]+)\.mat', 'match', 'once', 'tokens');
+    isok = ~cellfun(@isempty, tok);
+    nums = cellfun(@(x) str2double(x{1}), tok(isok));
+end
+
 
 % TODO - read effect names from formula
 %        in the dir if present
+num_perm = max(nums);
 num_effects = length(effect_name);
 
 % prepare pos and neg distrib
@@ -47,8 +59,16 @@ any_significant = true(num_effects, 1);
 while holms_continue
     holms_iter = holms_iter + 1;
     for n = 1:num_perm
+        if indir
         data = read_model_data(fullfile(pth, ['perm', num2str(n)]), ...
             elec);
+        else
+            data = load(fullfile(pth, sprintf('perm%d.mat', n)));
+            data = data.zs;
+            data = permute(data, [3, 2, 1]);
+            data = mat2cell(data, size(data,1), size(data,2), ...
+                ones(size(data,3), 1));
+        end
         
         for ef = 1:num_effects
             
@@ -70,7 +90,15 @@ while holms_continue
     end
     
     % read actual effect:
-    data = read_model_data(fullfile(pth, 'perm0'), elec);
+    if indir
+        data = read_model_data(fullfile(pth, 'perm0'), elec);
+    else
+        data = load(fullfile(pth, 'perm0.mat'));
+        data = data.zs;
+        data = permute(data, [3, 2, 1]);
+        data = mat2cell(data, size(data,1), size(data,2), ...
+            ones(size(data,3), 1));
+    end
     
     % cluster effects
     for ef = find(any_significant)'
