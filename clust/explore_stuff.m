@@ -20,7 +20,7 @@ classdef explore_stuff < handle
             if isstruct(t_val)
                 obj.opt.hasstat = true;
                 obj.stat = t_val;
-                t_val = stat.stat;
+                t_val = t_val.stat;
             else
                 obj.opt.hasstat = false;
             end
@@ -32,7 +32,8 @@ classdef explore_stuff < handle
             end
 
             % init - topofigure
-            obj.h.f1 = figure; obj.h.ax1 = axes('Parent', obj.h.f1);
+            obj.h.f1 = figure('units', 'normalized'); 
+            obj.h.ax1 = axes('Parent', obj.h.f1);
             obj.dims = length(size(t_val));
             obj.opt.current_effect = 55;
             obj.opt.t_threshold = 1.8;
@@ -59,6 +60,7 @@ classdef explore_stuff < handle
                 'normalized', 'position', ...
                 [0.3, 0.001, 0.2, 0.05], 'callback', ...
                 @(o, e) obj.change_effect(), 'value', 1);
+            obj.change_effect();
             obj.h.winlims = uicontrol('style', 'edit' , 'string', ...
                 obj.last_str, 'units', ...
                 'normalized', 'position', ...
@@ -81,7 +83,7 @@ classdef explore_stuff < handle
                 return
             end
             obj.last_str = strval;
-            xlim = str2num(strval);
+            xlim = str2num(strval); %#ok<ST2NM>
             xlim = xlim(1:2);
             ylim = get(obj.h.ax2, 'ylim');
             set(obj.h.patch, 'Visible', 'on', 'Vertices', ...
@@ -180,7 +182,8 @@ classdef explore_stuff < handle
                 obj.fun.chan(obj.h.f3, obj.opt.current_electrode);
             else
                 plot(obj.EEG.times, obj.t(obj.opt.current_electrode, :, ...
-                    obj.opt.current_effect));
+                    obj.opt.current_effect), 'linewidth', 2, ...
+                    'linesmoothing', 'on');
             end
             
         end
