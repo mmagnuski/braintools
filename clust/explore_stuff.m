@@ -8,6 +8,8 @@ classdef explore_stuff < handle
         last_str
         opt
         stat
+        fun
+        topo
         EEG
     end
     
@@ -24,18 +26,18 @@ classdef explore_stuff < handle
             end
             
             if nargin > 3
-                obj.fun.chan = vararigin{1};
-            end 
+                obj.fun.chan = varargin{1};
+            else
+                obj.fun.chan = [];
+            end
 
             % init - topofigure
             obj.h.f1 = figure; obj.h.ax1 = axes('Parent', obj.h.f1);
             obj.dims = length(size(t_val));
-            obj.opt.current_effect = 3;
+            obj.opt.current_effect = 55;
             obj.opt.t_threshold = 1.8;
-            if obj.dims > 3
-                obj.opt.current_electrode = 1;
-                obj.opt.current_electrode_h = [];
-            end
+            obj.opt.current_electrode = 1;
+            obj.opt.current_electrode_h = [];
 
             % plot electrodes
             if obj.dims > 3
@@ -45,11 +47,7 @@ classdef explore_stuff < handle
                 topoplot([], EEG.chanlocs);
             end
             obj.topo = topo_scrapper(gca);
-            if obj.dims > 3
-                set(obj.topo.elec_labels, 'ButtonDownFcn', @(o, e) obj.show_elec());
-            else
-                set(obj.topo.elec_labels, 'ButtonDownFcn', @(o, e) obj.show_elec_effect());
-            end
+            set(obj.topo.elec_marks, 'ButtonDownFcn', @(o, e) obj.show_elec(o));
             
             obj.EEG = EEG;
             obj.t = t_val;
@@ -103,6 +101,8 @@ classdef explore_stuff < handle
                 obj.h.f1 = figure; obj.h.ax1 = axes('Parent', obj.h.f1);
             end
             topoplot(val, obj.EEG.chanlocs); % 'chaninfo', self.EEG.chaninfo
+            obj.topo = topo_scrapper(gca);
+            set(obj.topo.elec_marks, 'ButtonDownFcn', @(o, e) obj.show_elec());
         end
 
         function show_elec(obj)
@@ -111,17 +111,24 @@ classdef explore_stuff < handle
             % set(gco, 'userdata', get(gco, 'string'));
             % set(gco, 'string', tmpstr);
             % clear tmpstr;
-            strelec = get(gco, 'userdata');
+            cursor_pos = get(gca, 'currentpoint');
+            difs = bsxfun(@minus, obj.topo.elec_pos(:, 1:2), ...
+                cursor_pos(1,1:2));
+            difs = sum(abs(difs), 2);
+            [~, chan_ind] = min(difs);
 
             % change color
-            set(gco, 'color', 'r');
             if ~isempty(obj.opt.current_electrode_h)
-                set(obj.opt.current_electrode_h, ...
-                    'color', 'k');
+                delete(obj.opt.current_electrode_h);
             end
 
-            obj.opt.current_electrode = str2num(strelec); %#ok<ST2NM>
-            obj.opt.current_electrode_h = gco;
+            hold on;
+            sc = scatter(obj.topo.elec_pos(chan_ind,1), ...
+                obj.topo.elec_pos(chan_ind,2), ...
+                'FaceColor', 'r');
+            obj.opt.current_electrode_h = sc;
+
+            obj.opt.current_electrode = chan_ind;
             if obj.dims > 3
                 obj.refresh_effect();
             else
