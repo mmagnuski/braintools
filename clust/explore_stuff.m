@@ -121,7 +121,9 @@ classdef explore_stuff < handle
 
             % change color
             if ~isempty(obj.opt.current_electrode_h)
+                try
                 delete(obj.opt.current_electrode_h);
+                end
             end
 
             hold on;
