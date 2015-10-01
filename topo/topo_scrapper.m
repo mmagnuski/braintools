@@ -44,7 +44,11 @@ shps = find(~elcs); elcs = find(elcs);
 ptch = find(strcmp(tps, 'patch'));
 
 % at the top are electrode markers
-h.elec_marks   = lns(elcs(1));
+if ~isempty(elcs)
+    h.elec_marks   = lns(elcs(1));
+else
+    h.elec_marks = [];
+end
 if length(elcs) > 1
 	h.elec_marks2  = lns(elcs(2));
 end
