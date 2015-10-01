@@ -102,7 +102,7 @@ classdef explore_stuff < handle
             else
                 obj.h.f1 = figure; obj.h.ax1 = axes('Parent', obj.h.f1);
             end
-            topoplot(val, obj.EEG.chanlocs); % 'chaninfo', self.EEG.chaninfo
+            topoplot(val, obj.EEG.chanlocs, 'electrodes', 'on'); % 'chaninfo', self.EEG.chaninfo
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', @(o, e) obj.show_elec());
         end
