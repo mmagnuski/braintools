@@ -69,10 +69,15 @@ while holms_continue
             elec);
         else
             data = load(fullfile(pth, sprintf('perm%d.mat', n)));
-            data = data.zs;
-            data = permute(data, [3, 2, 1]);
-            data = mat2cell(data, size(data,1), size(data,2), ...
-                ones(size(data,3), 1));
+            fld = fields(data);
+            data = data.(fld{1});
+            if ndims(data) == 3
+                % data = permute(data, [3, 2, 1]);
+                data = mat2cell(data, size(data,1), size(data,2), ...
+                    ones(size(data,3), 1));
+            elseif ndims(data) == 2
+                data = {data};
+            end
         end
         
         for ef = 1:num_effects
@@ -106,10 +111,15 @@ while holms_continue
         data = read_model_data(fullfile(pth, 'perm0'), elec);
     else
         data = load(fullfile(pth, 'perm0.mat'));
-        data = data.zs;
-        data = permute(data, [3, 2, 1]);
-        data = mat2cell(data, size(data,1), size(data,2), ...
-            ones(size(data,3), 1));
+        fld = fields(data);
+        data = data.(fld{1});
+        if ndims(data) == 3
+            % data = permute(data, [3, 2, 1]);
+            data = mat2cell(data, size(data,1), size(data,2), ...
+                ones(size(data,3), 1));
+        elseif ndims(data) == 2
+            data = {data};
+        end
     end
     
     % cluster effects
