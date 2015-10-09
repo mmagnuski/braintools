@@ -4,6 +4,9 @@ function [peak_val, peak_lat] = erp_peaks(EEG, ranges, rangedir, cond)
 
 n = 4;
 num_rng = length(ranges);
+if ~exist('cond', 'var')
+    cond = ones(EEG.trials, 1);
+end
 if ~(length(cond) == EEG.trials)
 	error('The length of cond does not match the number of trials.');
 end
