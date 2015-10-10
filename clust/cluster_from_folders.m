@@ -83,7 +83,7 @@ while holms_continue
             end
         end
         if tx_len > 0
-            fprintf(1, [repmat('\b', 1, tx_len)]);
+            fprintf(1, repmat('\b', 1, tx_len));
         end
         if opt.holms
             tx = sprintf('holms iteration %d, permutation %d\n', ...
