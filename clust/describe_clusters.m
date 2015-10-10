@@ -4,6 +4,21 @@ ifneg = femp(stat, 'negclusters');
 ifpos = femp(stat, 'posclusters');
 ifclose = false;
 
+probfld = {'prob', 'p'};
+if ifpos
+    goodf = isfield(stat.posclusters, probfld);
+end
+probfld = probfld(goodf);
+probfld = probfld{1};
+
+% stat field
+statfld = {'clusterstat', 'val'};
+if ifpos
+    goodf = isfield(stat.posclusters, statfld);
+end
+statfld = statfld(goodf);
+statfld = statfld{1};
+
 if nargin > 1
 	% output file:
 	if ischar(varargin{1})
@@ -21,7 +36,7 @@ end
 if ifpos
 	posnum = length(stat.posclusters);
 	posclst = stat.posclusters(1);
-	sigpos = sum([stat.posclusters.prob] < 0.05);
+    sigpos = sum([stat.posclusters.(probfld)] < 0.05);
 else
 	posnum = 0;
 	sigpos = 0;
@@ -29,7 +44,7 @@ end
 if ifneg
 	negnum = length(stat.negclusters);
 	negclst = stat.negclusters(1);
-	signeg = sum([stat.negclusters.prob] < 0.05);
+    signeg = sum([stat.negclusters.(probfld)] < 0.05);
 else
 	negnum = 0;
 	signeg = 0;
@@ -44,14 +59,14 @@ prnt('significant negative clusters: %d\n', {signeg});
 
 if ifpos
 prnt('\nmost significant positive cluster:\n', {});
-prnt('p value: %4.3f\n', {posclst.prob});
-prnt('summary stat: %5.2f\n', {posclst.clusterstat});
+prnt('p value: %4.3f\n', {posclst.(probfld)});
+prnt('summary stat: %5.2f\n', {posclst.(statfld)});
 end
 
 if ifneg
 prnt('\nmost significant negative cluster:\n', {});
-prnt('p value: %4.3f\n', {negclst.prob});
-prnt('summary stat: %5.2f\n', {negclst.clusterstat});
+prnt('p value: %4.3f\n', {negclst.(probfld)});
+prnt('summary stat: %5.2f\n', {negclst.(statfld)});
 end
 
 if ifclose
