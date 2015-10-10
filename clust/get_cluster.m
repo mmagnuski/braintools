@@ -19,6 +19,12 @@ end
 fld = [pol, 'clusters'];
 fldmat = [fld, 'labelmat'];
 
+% check whether field exists:
+if ~femp(stat, fld)
+    clst = [];
+    return
+end
+
 % check probability
 try
 	prob   = [stat.(fld).prob];
