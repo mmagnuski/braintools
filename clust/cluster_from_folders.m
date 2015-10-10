@@ -3,6 +3,10 @@ function varargout = cluster_from_folders(pth, chanconn, varargin)
 % stat = cluster_from_folders(pth, chanconn, effect_name)
 % CLUSTER_FROM_FOLDERS clusters data scattered across permutation folders
 
+% TODO - unify cluster_this and cluster_main
+% TODO - min_chan should be in varargin
+
+min_chan = 2;
 
 % dirnames:
 lst = dir(pth);
@@ -75,7 +79,7 @@ while holms_continue
                     data{ef}(h_stat{ef}.mask) = 0;
                 end
                 [posdist(n, ef), negdist(n, ef)] = ...
-                    cluster_this(data{ef}, 2, chanconn);
+                    cluster_this(data{ef}, 2, chanconn, min_chan);
             end
         end
         if tx_len > 0
@@ -104,7 +108,7 @@ while holms_continue
         end
         
         stat{ef} = cluster_main(data{ef}, chanconn, ...
-            posdist(:,ef), negdist(:,ef));
+            posdist(:,ef), negdist(:,ef), @sum, min_chan);
         
         if opt.holms
             % check for positive and negative significant clusters:
