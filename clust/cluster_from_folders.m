@@ -1,5 +1,4 @@
-function varargout = cluster_from_folders(pth, chanconn, ...
-    effect_name, varargin)
+function varargout = cluster_from_folders(pth, chanconn, varargin)
 
 % stat = cluster_from_folders(pth, chanconn, effect_name)
 % CLUSTER_FROM_FOLDERS clusters data scattered across permutation folders
@@ -26,7 +25,9 @@ end
 % TODO - read effect names from formula
 %        in the dir if present
 num_perm = max(nums);
-num_effects = length(effect_name);
+data = read_perm_data(pth, indir, 0);
+num_effects = length(data);
+clear data
 
 % prepare pos and neg distrib
 posdist = zeros(num_perm, num_effects);
