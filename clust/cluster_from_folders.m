@@ -64,21 +64,7 @@ any_significant = true(num_effects, 1);
 while holms_continue
     holms_iter = holms_iter + 1;
     for n = 1:num_perm
-        if indir
-        data = read_model_data(fullfile(pth, ['perm', num2str(n)]), ...
-            elec);
-        else
-            data = load(fullfile(pth, sprintf('perm%d.mat', n)));
-            fld = fields(data);
-            data = data.(fld{1});
-            if ndims(data) == 3
-                % data = permute(data, [3, 2, 1]);
-                data = mat2cell(data, size(data,1), size(data,2), ...
-                    ones(size(data,3), 1));
-            elseif ndims(data) == 2
-                data = {data};
-            end
-        end
+        data = read_perm_data(pth, indir, n);
         
         for ef = 1:num_effects
             
@@ -107,20 +93,7 @@ while holms_continue
     end
     
     % read actual effect:
-    if indir
-        data = read_model_data(fullfile(pth, 'perm0'), elec);
-    else
-        data = load(fullfile(pth, 'perm0.mat'));
-        fld = fields(data);
-        data = data.(fld{1});
-        if ndims(data) == 3
-            % data = permute(data, [3, 2, 1]);
-            data = mat2cell(data, size(data,1), size(data,2), ...
-                ones(size(data,3), 1));
-        elseif ndims(data) == 2
-            data = {data};
-        end
-    end
+    data = read_perm_data(pth, indir, 0);
     
     % cluster effects
     for ef = find(any_significant)'
@@ -150,4 +123,24 @@ if opt.holms
     varargout{2} = stat;
 else
     varargout{1} = stat;
+end
+
+function data = read_perm_data(pth, indir, n)
+if indir
+    data = read_model_data(fullfile(pth, ['perm', num2str(n)]), ...
+        elec);
+else
+    data = load(fullfile(pth, sprintf('perm%d.mat', n)));
+    fld = fields(data);
+    data = data.(fld{1});
+    if ndims(data) == 3
+        sz = size(data);
+        if sz(3) > sz(1)
+            data = permute(data, [3, 2, 1]);
+        end
+        data = mat2cell(data, size(data,1), size(data,2), ...
+            ones(size(data,3), 1));
+    elseif ndims(data) == 2 %#ok<ISMAT>
+        data = {data};
+    end
 end
