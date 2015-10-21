@@ -7,52 +7,66 @@ function clst = get_cluster(stat, pval, pol)
 % TODOs:
 % [ ] turn into an object with lazy+persistent param evaluation
 
-if ~exist('pol', 'var')
-    pol = 'pos';
+if ~exist('pol', 'var') || isempty(pol)
+    pol = 'both';
 end
 
 if ~exist('pval', 'var')
     pval = 0.05;
 end
 
+
 % clusterslabelmat (pos) or (neg):
-fld = [pol, 'clusters'];
-fldmat = [fld, 'labelmat'];
-
-% check whether field exists:
-if ~femp(stat, fld)
-    clst = [];
-    return
-end
-
-% check probability
-try
-	prob   = [stat.(fld).prob];
-catch
-	prob = [stat.(fld).p];
-end
-signif = find(prob < pval);
-
-if ~isempty(signif)
-	for s = 1:length(signif)
-		% construct useful cluster fields
-		clst(s).prob     = prob(signif(s));
-		clst(s).boolmat  = stat.(fldmat) == signif(s);
-		clst(s).samples  = find(sum(clst(s).boolmat > 0, 1));
-		clst(s).nsamp    = length(clst(s).samples);
-		clst(s).edges    = clst(s).samples([1, end]);
-		clst(s).elecs    = find(sum(clst(s).boolmat > 0, 2));
-
-        % chan labels
-        try
-            clst(s).label    = stat.label(clst(s).elecs);
-        end
-        % time labels
-        try
-            clst(s).time     = stat.time(clst(s).samples);
-            clst(s).timedges = clst(s).time([1, end]);
-        end 
-	end
+if strcmp(pol, 'both')
+    fld = cellfun(@(x) [x, 'clusters'], {'pos', 'neg'}, ...
+        'Uni', false);
+    fldmat = cellfun(@(x) [x, 'labelmat'], fld, ...
+        'Uni', false);
 else
-	clst = [];
+    fld = {[pol, 'clusters']};
+    fldmat = {[fld, 'labelmat']};
+end
+
+clst = struct();
+ci = 1;
+
+for f = 1:length(fld)
+
+    % check whether field exists:
+    if ~femp(stat, fld{f})
+        continue
+    end
+
+    % check probability
+    try
+        prob   = [stat.(fld{f}).prob];
+    catch %#ok<*CTCH>
+        prob = [stat.(fld{f}).p];
+    end
+
+    signif = find(prob < pval);
+
+    if ~isempty(signif)
+        for s = 1:length(signif)
+            % construct useful cluster fields
+            clst(ci).pol      = fld{f}(1:3);
+            clst(ci).prob     = prob(signif(s));
+            clst(ci).boolmat  = stat.(fldmat{f}) == signif(s);
+            clst(ci).samples  = find(sum(clst(ci).boolmat > 0, 1));
+            clst(ci).nsamp    = length(clst(ci).samples);
+            clst(ci).edges    = clst(ci).samples([1, end]);
+            clst(ci).elecs    = find(sum(clst(ci).boolmat > 0, 2));
+
+            % chan labels
+            try %#ok<*TRYNC>
+                clst(ci).label    = stat.label(clst(s).elecs);
+            end
+            % time labels
+            try
+                clst(ci).time     = stat.time(clst(ci).samples);
+                clst(ci).timedges = clst(ci).time([1, end]);
+            end
+            ci = ci + 1;
+        end
+    end
 end
