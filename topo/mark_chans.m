@@ -1,5 +1,23 @@
 function tp = mark_chans(tp, elecs, varargin)
 
+% mark channels in a given topoplot 
+%
+% inputs
+% ------
+% tp - topolot handles returned byt topo_scrapper
+% elecs - electrode indices
+% 
+% optional key-value inputs
+% -------------------------
+% marker - string, matlab-style, for example '.' (default is '.')
+% markersize - numeric; size of the marker (default: 23)
+% markeredgecolor - 1x3 RGB vector (default: [0.8, 0.4, 0.2])
+% 
+% output
+% ------
+% tp - structure of topoplot handles with a field storing
+%      handles to the marked channels
+
 if ~isempty(varargin)
 	varopts = struct(varargin{:});
 else
