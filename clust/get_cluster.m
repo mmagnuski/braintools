@@ -11,7 +11,7 @@ if ~exist('pol', 'var') || isempty(pol)
     pol = 'both';
 end
 
-if ~exist('pval', 'var')
+if ~exist('pval', 'var') || isempty(pval)
     pval = 0.05;
 end
 
