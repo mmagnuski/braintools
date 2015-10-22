@@ -20,7 +20,14 @@ end
 if ischar(opt) && strcmp(opt, 'mark')
 
 	topoplot([], EEG.chanlocs, 'style', 'blank', ...
-                'chaninfo', EEG.chaninfo);
+                'chaninfo', EEG.chaninfo, ...
+                'electrodes', 'on');
 	tp = topo_scrapper(gca);
-	tp = mark_chans(tp, varargin);
+    chan_ind = varargin{1};
+    if length(varargin) > 1
+        varargin = varargin(2:end);
+    else
+        varargin = [];
+    end
+	tp = mark_chans(tp, chan_ind, varargin);
 end
