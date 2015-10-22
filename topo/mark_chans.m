@@ -26,7 +26,8 @@ end
 
 mark.marker = '.';
 mark.markersize = 23;
-mark.markeredgecolor = [0.8, 0.4, 0.2];
+mark.markeredgecolor = [1, 1, 1];
+mark.markerfacecolor = [1, 1, 1];
 
 for f = fields(varopts)'
 	mark.(f{1}) = varopts.(f{1});
