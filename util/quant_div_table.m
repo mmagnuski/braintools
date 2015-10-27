@@ -12,6 +12,7 @@ for q = 1:length(qnt)-1
 	tgrp(sbj_val >= qnt(q) & sbj_val < qnt(q+1)) = q+1;
 end
 tgrp(sbj_val < qnt(1)) = 1;
+tgrp(sbj_val >= qnt(end)) = length(qnt)+1;
 for s = 1:size(sbj, 1)
 	grp(sbj(s,2):sbj(s,3)) = tgrp(s);
 end
