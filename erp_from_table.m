@@ -21,8 +21,18 @@ for a = 1:length(agrp)
 	end
 end
 
+% if we wanted the averages for every subject
+% we can stop now
+if isempty(across) || (ischar(across) && ...
+        strcmp(across, 'subject'))
+    return
+end
+
+% now, subject-level averages should be grouped
+% according to 'across' function
 one_grp = group(across_grp);
-merge = get_grouping(trials(one_grp(:,2), :), across);
+one_tri_df = trials(one_grp(:,2), :);
+merge = get_grouping(one_tri_df, across);
 umrg = unique(merge);
 real_erp = zeros(length(umrg), size(erp, 2), size(erp, 3));
 for m = 1:length(umrg)
