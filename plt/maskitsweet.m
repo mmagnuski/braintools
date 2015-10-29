@@ -221,19 +221,19 @@ function [outputs, handles] = maskitsweet(matri, mask, varargin)
 
 % TO-DOs:
 % ADD:
+%      [ ] easier and clearer parameter names, for example:
+%      [ ] change naming conventions (?)
+%           'freq_interval' or 'freq interval'
+%          - ForceFreq should be renamed to RoundFreq
+%          - JumpFreq --> FreqInterval
 %      [ ] correct line plotting when XData is passed
 %      [ ] testing for input type
 %          [ ] obligatory input
 %          [ ] additional input
-%      [ ] change naming conventions (?)
-%           'freq_interval' or 'freq interval'
 %      [ ] tidy up input checks
-%      [ ] easier and clearer parameter names, for example:
-%          - ForceFreq should be renamed to RoundFreq
-%          - JumpFreq --> FreqInterval
 %      [ ] change the way JumpFreq and JumpTime work
 %          - by default the should look for non-discrete
-%            points to place the ticks in
+%            points to place the ticks in (what did I mean by this?)
 %      [ ] if Freq given --> default 'JumpFreq' is
 %          [1, 2, 4, 5, 8, 10, 15, 20] - whichever
 %          is the first one that fits at least 4
@@ -335,9 +335,9 @@ if nargin > 2
         1, 1, 1, 1]);
     [opt, delv] = check_maskitsweet_inputs(opt, varargin, names, vals);
     % =============
-    
+
     current_vargin = length(varargin) - delv;
-    
+
     % ==using erspboot to create mask==
     if current_vargin > 0
         adr = find(strcmp('boot',varargin));
@@ -345,7 +345,7 @@ if nargin > 2
             erspboot = varargin{adr+1};
             % allocate mask
             mask = false(size(matri));
-            
+
             % fill mask with values out of
             % erspboot limits
             if size(erspboot,2) == 2
@@ -364,10 +364,10 @@ if nargin > 2
             clear bt frq erspboot outoflims
         end
     end
-    
+
     % give back those handles!
     handles = opt.handles;
-    
+
     % ! CHANGE !
     % ==whether to open a new figure==
     if current_vargin > 0
@@ -392,7 +392,7 @@ if nargin > 2
             % current_vargin = current_vargin - 2;
         end
     end
-    
+
 end
 %  ===end of options scan===
 
