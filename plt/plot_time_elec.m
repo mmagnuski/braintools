@@ -1,4 +1,4 @@
-function plot_time_elec(stat, varargin)
+function h = plot_time_elec(stat, varargin)
 
 % creates a plot with maskitsweet of 2d stat effects
 % highlighting significant clusters
@@ -45,6 +45,7 @@ maskopt = {'nosig', 0.65, 'lines', true, ...
     'LineWidth', 0.5, 'Time', stat.time, ...
     'AxH', opt.ax, 'nosig', opt.nosig};
 maskitsweet(val, mask, maskopt{:});
+[~, h] = maskitsweet(val, mask, maskopt{:});
 
 
 % finishing up
@@ -75,7 +76,7 @@ set(gca, 'YTickLabel', {'anterior', 'central', 'posterior'});
 X = get(gca, 'XLim');
 for i = 1:2
     Y = repmat(lims(2, i), [1, 2]);
-    line(X, Y+0.5, 'color', 'k', ...
+    h.divlines(i) = line(X, Y+0.5, 'color', 'k', ...
         'linewidth', 0.5);
 end
 
