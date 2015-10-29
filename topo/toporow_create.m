@@ -1,10 +1,23 @@
 function ax = toporow_create(fig, hlims, uplim, ntopo)
 
 % TOPOROW_CREATE creates axes for topoplot
-% images given constraints
-% The axes have equal axis length
+% images given constraints (hlims, uplim, ntopo)
+% The axes have equal axis length (in what units?).
 %
+% ax = toporow_create(fig, hlims, uplim, ntopo)
+%
+% arguments
+% ---------
+% fig      - figure handle
 % hlims - left, between_topo, right
+%         (in pixels or normalized units)
+% uplim - align topos to this upper limit
+%         (in pixels or normalized units)
+% ntopo - number of topo axes
+%
+% output
+% ------
+% ax - axes handles
 
 % get pixel values
 orig_units = get(fig, 'Units');
