@@ -24,7 +24,7 @@ if strcmp(pol, 'both')
         'Uni', false);
 else
     fld = {[pol, 'clusters']};
-    fldmat = {[fld, 'labelmat']};
+    fldmat = {[fld{1}, 'labelmat']};
 end
 
 clst = struct();
