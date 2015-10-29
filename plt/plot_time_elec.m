@@ -6,6 +6,7 @@ function h = plot_time_elec(stat, varargin)
 opt.pval = 0.05;
 opt.ax = gca;
 opt.nosig = 0.75;
+opt.colors = [];
 
 if ~isempty(varargin)
     opt = parse_arse(varargin, opt);
@@ -16,20 +17,39 @@ tickFont = 9;
 labFont  = 12;
 
 % get clusters
-pos_clst = get_cluster(stat, opt.pval, 'pos');
-neg_clst = get_cluster(stat, opt.pval, 'neg');
+clst = get_cluster(stat, opt.pval);
 
 % create mask:
-mask = false(size(stat.stat));
-
-if isstruct(pos_clst)
-    for s = 1:length(pos_clst)
-        mask = mask | pos_clst(s).boolmat;
-    end
+mask = zeros(size(stat.stat));
+col = zeros(length(clst), 3);
+for c = 1:length(clst)
+    mask(clst(c).boolmat) = c;
 end
-if isstruct(neg_clst)
-    for s = 1:length(neg_clst)
-        mask = mask | neg_clst(s).boolmat;
+
+
+% cluster colors
+if femp(opt, 'colors') && logical(opt.colors) && opt.colors
+    opt.colors = zeros(length(clst), 3);
+    pn = [false, false];
+    clst_col = [0, 0, 0; 0.4, 0.4, 0.4; ...
+           1, 1, 1; 0.85, 0.85, 0.85];
+
+    for c = 1:length(clst)
+        if strcmp(clst(c).pol, 'pos')
+            if pn(1)
+                opt.colors(c,:) = clst_col(2,:);
+            else
+                opt.colors(c,:) = clst_col(1,:);
+                pn(1) = true;
+            end
+        else
+           if pn(2)
+                opt.colors(c,:) = clst_col(4,:);
+            else
+                opt.colors(c,:) = clst_col(3,:);
+                pn(2) = true;
+            end
+        end
     end
 end
 
@@ -40,11 +60,18 @@ mask = mask(ord.order,:);
 
 
 % maskitsweet
-maskopt = {'nosig', 0.65, 'lines', true, ...
+maskopt = {'nosig', opt.nosig, 'lines', true, ...
     'LineColor', [0.5, 0.5, 0.5], ...
     'LineWidth', 0.5, 'Time', stat.time, ...
-    'AxH', opt.ax, 'nosig', opt.nosig};
-maskitsweet(val, mask, maskopt{:});
+    'AxH', opt.ax};
+maskopt = struct(maskopt{:});
+maskopt.Cluster = true;
+if femp(opt, 'colors')
+    maskopt = rmfield(maskopt, 'LineColor');
+    maskopt.LineWidth = 1;
+    maskopt.ClusterColor = opt.colors;
+end
+maskopt = struct_unroll(maskopt);
 [~, h] = maskitsweet(val, mask, maskopt{:});
 
 
