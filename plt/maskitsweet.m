@@ -686,7 +686,8 @@ for i = 1:2
 end
 
 % ensure cluster colors are correct
-if opt.Cluster && any(opt.lines)
+if opt.Cluster && any(opt.lines) && femp(opt, 'ClusterColor')
+    use_cluster_colors = true;
     uni_clst_lab = unique(cluster_labels);
     n_clusters = length(uni_clst_lab);
     if any(uni_clst_lab==0)
@@ -701,6 +702,8 @@ if opt.Cluster && any(opt.lines)
         opt.ClusterColor = repmat(opt.ClusterColor, [multip, 1]);
         opt.ClusterColor = opt.ClusterColor(1:n_clusters, :);
     end
+else
+    use_cluster_colors = false;
 end
 
 lin_col = opt.LineColor;
@@ -709,7 +712,7 @@ for l = 1:length(opt.lines)
         if ~isempty(opt.p)
             mask{l} = pmask < opt.p(l);
         end
-        if opt.Cluster
+        if opt.Cluster && use_cluster_colors
             mask{l} = cluster_labels == l;
             lin_col = opt.ClusterColor(l, :);
         end
