@@ -2,6 +2,14 @@ function h = plot_time_elec(stat, varargin)
 
 % creates a plot with maskitsweet of 2d stat effects
 % highlighting significant clusters
+%
+% plot_time_elec(stat, ...)
+%
+% optional arguments:
+% -------------------
+% pval   - significance threshold
+% ax     - axis to plot in
+% colors - cluster colors
 
 opt.pval = 0.05;
 opt.ax = gca;
@@ -52,6 +60,7 @@ if femp(opt, 'colors') && logical(opt.colors) && opt.colors
         end
     end
 end
+
 
 % get electrode ordering
 ord = smart_order(true);
