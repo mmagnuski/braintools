@@ -53,6 +53,15 @@ function [outputs, handles] = maskitsweet(matri, mask, varargin)
 %                        maskitsweet(ersp, mask, 'lines', 'LineColor',...
 %                            [0.8, 0.2, 0.1]);
 %     'LineWidth'  - width of these lines (default: 1)
+%     'Cluster'    - whether to use the mask matrix as a specification of clusters
+%                    (0-no cluster, all other positive integers label pixels as
+%                     contributing/belonging to a specific cluster)
+%                    this setting takes effect when lines are allowed and sets
+%                    different line colors to different clusters
+%     'ClusterColor' - nClusters x 3 matrix, the RGB colors to draw cluster
+%                      lines with. Nth cluster gets its boarder lines colored
+%                      with nth row from ClusterColor matrix
+%
 %
 % MASKING OPTIONS:
 % 'nosig'      - level of transparency for nonsignificant values
@@ -298,6 +307,10 @@ opt.AddHz = false;
 opt.handles.figure = [];
 opt.handles.axis = [];
 
+% cluster coloring
+opt.Cluster = false;
+opt.ClusterColor = [];
+
 % checking if the matrix is real:
 if ~isreal(matri)
     matri = abs(matri);
@@ -313,13 +326,13 @@ if nargin > 2
         'MaskColor', 'NumTim', 'NumFreq', 'JumpTime', 'JumpFreq',...
         'ForceZero', 'ForceFreq', 'ZeroLine', 'CMin', 'CMax',...
         'PlotScale', 'MapCent', 'MapEdge', 'NoRGB', 'CMap', 'NoTransp',...
-        'DiscreteTime', 'AddHz'};
+        'DiscreteTime', 'AddHz', 'Cluster', 'ClusterColor'};
     % whether followed by value:
     vals = logical([1, 1, 1, 1, 1, 1, 1,...
         1, 1, 1, 1, 1,...
         1, 1, 1, 1, 1, ...
         0, 1, 1, 0, 1, 0,...
-        1, 1]);
+        1, 1, 1, 1]);
     [opt, delv] = check_maskitsweet_inputs(opt, varargin, names, vals);
     % =============
     
@@ -397,7 +410,7 @@ if ~islogical(mask) && ~isempty(mask)
             if isempty(opt.p)
                 opt.p = 0.05;
             end
-        else
+        elseif ~opt.Cluster
             % throw an error, haha!
             error(['Unrecognized mask matrix input. The mask ',...
                 'matrix has to either be (1) logical, (2) numerical with ',...
@@ -451,6 +464,10 @@ if ~isempty(opt.p)
     mask = newmask;
     clear newmask i nummasks tempp
 else
+    if opt.Cluster
+        cluster_labels = mask;
+        mask = mask > 0;
+    end
     mask = {mask};
     opt.lines = opt.lines(1);
 end
@@ -668,10 +685,33 @@ for i = 1:2
     units.(['half', uni{i}]) = diff(units.(uni{i})([1, 2])) / 2;
 end
 
+% ensure cluster colors are correct
+if opt.Cluster && any(opt.lines)
+    uni_clst_lab = unique(cluster_labels);
+    n_clusters = length(uni_clst_lab);
+    if any(uni_clst_lab==0)
+        n_clusters = n_clusters - 1;
+    end
+    if length(opt.lines) ~= n_clusters
+        opt.lines = true(1, n_clusters);
+    end
+    clst_col = size(opt.ClusterColor, 1);
+    if clst_col ~= n_clusters
+        multip = ceil((n_clusters - clst_col) / clst_col);
+        opt.ClusterColor = repmat(opt.ClusterColor, [multip, 1]);
+        opt.ClusterColor = opt.ClusterColor(1:n_clusters, :);
+    end
+end
+
+lin_col = opt.LineColor;
 for l = 1:length(opt.lines)
     if opt.lines(l)
         if ~isempty(opt.p)
             mask{l} = pmask < opt.p(l);
+        end
+        if opt.Cluster
+            mask{l} = cluster_labels == l;
+            lin_col = opt.ClusterColor(l, :);
         end
 
         % =go through rows=:
@@ -711,7 +751,7 @@ for l = 1:length(opt.lines)
         % for rows:
         for i = 1:size(rowX,1)
             handles.lines(i) = line(rowX(i,:), rowY(i,:), ...
-                'Color', opt.LineColor, 'LineWidth', opt.LineWidth, ...
+                'Color', lin_col, 'LineWidth', opt.LineWidth, ...
                 'Parent', handles.axis);
         end
         lasti = i;
@@ -720,7 +760,7 @@ for l = 1:length(opt.lines)
         % for cols:
         for i = 1:size(colX,1)
             handles.lines(lasti + i) = line(colX(i,:), colY(i,:), ...
-                'Color', opt.LineColor, 'LineWidth', opt.LineWidth, ...
+                'Color', lin_col, 'LineWidth', opt.LineWidth, ...
                 'Parent', handles.axis);
         end
         clear colX colY i lasti
@@ -791,7 +831,7 @@ if ~isempty(opt.Time)
             % set mask XData:
             % CHANGE - if NoTransp, this should not be done:
             if ~opt.NoTransp
-                for i = 1:length(mask)
+                for i = 1:length(handles.mask)
                     set(handles.mask{i}, 'XData', [opt.Time(1), opt.Time(end)]);
                 end
             end
