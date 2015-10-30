@@ -8,6 +8,7 @@ function plot_topo_slices(stat, clst, twin, ax, locs, varargin)
 pval     = 0.05;
 elc_col  = [0, 0, 0];
 title_font_size = 8;
+opt.titles = true;
 
 % marker definition
 opt.markertype    = '.';
@@ -26,6 +27,10 @@ if nargin > 5
 	opt = parse_arse(varargin, opt);
 end
 
+timstr = '%d - %d ms';
+if strcmp(opt.timeunits, 's')
+	timstr = '%4.3f - %4.3f s';
+end
 
 % bothbool = clst{1}.boolmat | clst{2}.boolmat;
 scalelim = [min(min(stat.stat)), max(max(stat.stat))];
@@ -45,9 +50,21 @@ for t = 1:size(twin.samples, 1)
 	    'maplimits', scalelim);
 
 	% add title about time
-	title(sprintf('%d - %d ms', ...
-		twin.times(t,1), twin.times(t,2)),...
-		'fontsize', title_font_size);
+    set(ax(t), 'units', 'normalized');
+	if opt.titles
+		time_text = sprintf(timstr, ...
+			twin.times(t,1), twin.times(t,2));
+		title_h = title(time_text,...
+			'fontsize', title_font_size);
+		if strcmp(opt.titles, 'below')
+			xl = get(ax(t), 'xlim');
+            yl = get(ax(t), 'ylim');
+			set(title_h, 'Position', ...
+				[mean(xl), yl(1) - 0.15], ...
+				'HorizontalAlignment', 'center');
+% 				'VerticalAlignment', 'bottom', ...
+		end
+	end
 	
 	% disect topoplot
 	h = topo_scrapper(ax(t));
