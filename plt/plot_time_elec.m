@@ -37,28 +37,7 @@ end
 
 % cluster colors
 if femp(opt, 'colors') && logical(opt.colors) && opt.colors
-    opt.colors = zeros(length(clst), 3);
-    pn = [false, false];
-    clst_col = [0, 0, 0; 0.4, 0.4, 0.4; ...
-           1, 1, 1; 0.85, 0.85, 0.85];
-
-    for c = 1:length(clst)
-        if strcmp(clst(c).pol, 'pos')
-            if pn(1)
-                opt.colors(c,:) = clst_col(2,:);
-            else
-                opt.colors(c,:) = clst_col(1,:);
-                pn(1) = true;
-            end
-        else
-           if pn(2)
-                opt.colors(c,:) = clst_col(4,:);
-            else
-                opt.colors(c,:) = clst_col(3,:);
-                pn(2) = true;
-            end
-        end
-    end
+    [~, opt.colors] = color_clusters(clst);
 end
 
 
