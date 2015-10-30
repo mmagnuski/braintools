@@ -22,6 +22,9 @@ if ~exist('pval', 'var')
     pval = 0.05;
 end
 
+% CHANGE - nwin could be estimated to optimally 
+%          present data or to have each window
+%          not longer than some time amount
 if ~exist('nwin', 'var')
     nwin = 4;
 end
@@ -44,26 +47,35 @@ if ~isempty(nc)
 end
 
 % find time limits
-fl   = {'first', 'last'};
-tlim = cellfun(@(x) find(tim, 1, x), fl);
+wins = group(tim);
+wins(wins(:,1)==0,:) = [];
+wins = wins(:,2:3);
 
 % calculate window samples:
-total_time  = diff(tlim) + 1;
+lens = diff(wins, [], 2) + 1;
+total_time  = sum(lens);
 window_time = round(total_time / nwin);
 
 % extend/shorten tlimits in some cases:
-tol = 10;
-new_total_time = window_time * nwin;
-diff_time = new_total_time - total_time;
-if abs(diff_time) <= tol
-    p1 = round(diff_time / 2);
-    p2 = diff_time - p1;
-    tlim = tlim - [p1, p2];
-end
-    
-clear tol p1 p2 new_total_time
+% tol = 10;
+% new_total_time = window_time * nwin;
+% diff_time = new_total_time - total_time;
+% if abs(diff_time) <= tol
+%     p1 = round(diff_time / 2);
+%     p2 = diff_time - p1;
+%     tlim = tlim - [p1, p2];
+% end
 
 % create window limits
-win_start_samples = tlim(1):window_time:tlim(2);
+do_not_win = round(0.25 * window_time);
+win_start_samples = [];
+for r = 1:size(lens, 1)
+    current_wins = wins(r, 1):window_time:wins(r,2);
+    last_len = wins(r,2) - current_wins(end) + 1;
+    if last_len <= do_not_win
+        current_wins(end) = [];
+    end
+    win_start_samples = [win_start_samples, current_wins]; %#ok<AGROW>
+end
 twin.samples = [win_start_samples', win_start_samples' + window_time - 1];
 twin.times   = stat.time(twin.samples);
