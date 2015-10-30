@@ -1,4 +1,4 @@
-function plot_topo_slices(stat, twin, ax, locs)
+function plot_topo_slices(stat, clst, twin, ax, locs, varargin)
 
 % PLOT_TOPO_SLICES plots topos of stat values
 % from consecutive time windows in passed axes
@@ -10,19 +10,20 @@ elc_col  = [0, 0, 0];
 title_font_size = 8;
 
 % marker definition
-marker.type    = '.';
-marker.size    = 6;
-marker.lw      = 0.5;
-marker.edgecol = [0, 0, 0; 0, 0, 0];
+opt.markertype    = '.';
+opt.markersize    = 6;
+opt.markerlw      = 0.5;
+opt.toposhapelw   = 0.75;
+opt.topocontourlw = 0.1;
 
-% marker colors depending on polarity
-posneg_cls_color = [[0, 0, 0];  ...
-					[1, 1, 1] ];
-% posneg_cls_color = [[243, 109, 116] / 255;  ...
-% 					[0,   162, 232] / 255 ];
+% check timeunits
+opt.timeunits = 'ms';
+if mean(diff(stat.time)) < 0.3
+	opt.timeunits = 's';
+end
 
-if marker.type == '.'
-	marker.edgecol = posneg_cls_color;
+if nargin > 5
+	opt = parse_arse(varargin, opt);
 end
 
 % get clusters
@@ -56,11 +57,11 @@ for t = 1:size(twin.samples, 1)
 
 	% change line width
 	set([h.left_ear, h.right_ear, h.nose, h.head], ...
-		'LineWidth', 0.75);
+		'LineWidth', opt.toposhapelw);
 	% change rim size:
 	scale_topo_rim(h, 1.5);
 	% change contour lines width
-	set(h.hggroup, 'LineWidth', 0.1);
+	set(h.hggroup, 'LineWidth', opt.topocontourlw);
 
 	% TODO
 	% color electrodes with cluster
