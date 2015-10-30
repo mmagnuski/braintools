@@ -3,10 +3,14 @@ function plot_topo_slices(stat, clst, twin, ax, locs, varargin)
 % PLOT_TOPO_SLICES plots topos of stat values
 % from consecutive time windows in passed axes
 % 
+% plot_topo_slices(stat, clst, twin, ax, locs)
+%
+
+% TODOs:
+% [ ] - check chan overlap
 
 % defaults
 pval     = 0.05;
-elc_col  = [0, 0, 0];
 title_font_size = 8;
 opt.titles = true;
 
@@ -33,6 +37,8 @@ if strcmp(opt.timeunits, 's')
 end
 
 % bothbool = clst{1}.boolmat | clst{2}.boolmat;
+% scalelim may be changed not to scale up to
+% max but sth below...
 scalelim = [min(min(stat.stat)), max(max(stat.stat))];
 
 % plot each timeslice
