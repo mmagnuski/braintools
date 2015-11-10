@@ -24,8 +24,13 @@ function grp = group(dt)
 
 % written by M. Magnuski, 23 march 2014
 
-% length
+
+% 
+if islogical(dt)
+    dt = int32(dt);
+end
 dt(end+1) = dt(end) + 1;
+% length
 len = length(dt);
 
 % allocate output
