@@ -35,12 +35,12 @@ nc = get_cluster(stat, pval, 'neg');
 
 % get times
 tim = false(size(stat.time));
-if ~isempty(pc)
+if ~isempty(pc) && ~isempty(fields(pc))
     for c = 1:length(pc)
         tim(pc(c).samples) = true;
     end
 end
-if ~isempty(nc)
+if ~isempty(nc) && ~isempty(fields(nc))
     for c = 1:length(nc)
         tim(nc(c).samples) = true;
     end
