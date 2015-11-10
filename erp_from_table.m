@@ -1,8 +1,11 @@
 function erp = erp_from_table(trials, eeg, avgfun, byrow, ...
 	within, across)
 
-if ~exist('byrow', 'var')
+if ~exist('byrow', 'var') || isempty(byrow)
 	byrow = 'subject';
+end
+if ~exist('across', 'var') || isempty(across)
+	across = 'subject';
 end
 
 across_grp = get_grouping(trials, byrow);
@@ -23,8 +26,7 @@ end
 
 % if we wanted the averages for every subject
 % we can stop now
-if isempty(across) || (ischar(across) && ...
-        strcmp(across, 'subject'))
+if (ischar(across) && strcmp(across, 'subject'))
     return
 end
 
