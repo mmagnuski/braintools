@@ -15,6 +15,9 @@ if ~exist('pval', 'var') || isempty(pval)
     pval = 0.05;
 end
 
+if ~femp(stat, 'dimord')
+    stat.dimord = 'chan_time';
+end
 
 % clusterslabelmat (pos) or (neg):
 if strcmp(pol, 'both')
@@ -52,11 +55,26 @@ for f = 1:length(fld)
             clst(ci).pol      = fld{f}(1:3);
             clst(ci).prob     = prob(signif(s));
             clst(ci).boolmat  = stat.(fldmat{f}) == signif(s);
-            clst(ci).samples  = find(sum(clst(ci).boolmat > 0, 1));
-            clst(ci).nsamp    = length(clst(ci).samples);
-            clst(ci).edges    = clst(ci).samples([1, end]);
-            clst(ci).elecs    = find(sum(clst(ci).boolmat > 0, 2));
-
+            
+            cmp = strcmp(stat.dimord , {'chan_time', 'freq_time'});
+            
+            if any(cmp)
+                clst(ci).samples  = find(sum(clst(ci).boolmat > 0, 1));
+                clst(ci).nsamp    = length(clst(ci).samples);
+                clst(ci).edges    = clst(ci).samples([1, end]);
+                
+                if cmp(1)
+                    clst(ci).elecs    = find(sum(clst(ci).boolmat > 0, 2));
+                else
+                    clst(ci).freqs    = find(sum(clst(ci).boolmat > 0, 2));
+                end
+            elseif strcmp(stat.dimord , 'chan_freq_time')
+                clst(ci).samples  = find(squeeze(...
+                    sum(sum(clst(ci).boolmat > 0, 1),2)));
+                clst(ci).nsamp    = length(clst(ci).samples);
+                clst(ci).edges    = clst(ci).samples([1, end]);
+            end
+            
             % chan labels
             try %#ok<*TRYNC>
                 clst(ci).label    = stat.label(clst(s).elecs);
