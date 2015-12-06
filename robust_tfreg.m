@@ -31,7 +31,7 @@ function [t, p] = robust_tfreg(data, beh, varargin)
 
 
 % settings:
-step = 100;
+step = 250;
 verbose = true; %#ok<*NASGU>
 cobeh = [];
 cobrain = [];
