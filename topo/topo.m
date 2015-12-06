@@ -48,3 +48,6 @@ if ischar(opt) && strcmp(opt, 'mark')
     delete(tp.elec_marks);
     tp = rmfield(tp, 'elec_marks');
 end
+if isnumeric(opt)
+    topoplot(EEG.chanlocs, opt(:));
+end
