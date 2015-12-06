@@ -30,25 +30,26 @@ else
     fldmat = {[fld{1}, 'labelmat']};
 end
 
+
 clst = struct();
 ci = 1;
 
 for f = 1:length(fld)
-
+    
     % check whether field exists:
     if ~femp(stat, fld{f})
         continue
     end
-
+    
     % check probability
     try
         prob   = [stat.(fld{f}).prob];
     catch %#ok<*CTCH>
         prob = [stat.(fld{f}).p];
     end
-
+    
     signif = find(prob < pval);
-
+    
     if ~isempty(signif)
         for s = 1:length(signif)
             % construct useful cluster fields
