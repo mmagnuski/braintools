@@ -15,6 +15,8 @@ opt.pval = 0.05;
 opt.ax = gca;
 opt.nosig = 0.75;
 opt.colors = [];
+opt.remove_chin = false;
+opt.remove_Cz = false;
 
 if ~isempty(varargin)
     opt = parse_arse(varargin, opt);
@@ -42,7 +44,7 @@ end
 
 
 % get electrode ordering
-ord = smart_order(true);
+ord = smart_order(stat, opt);
 val = stat.stat(ord.order,:);
 mask = mask(ord.order,:);
 
