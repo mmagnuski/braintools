@@ -24,6 +24,13 @@ if ischar(opt) && strcmp(opt, 'mark')
 
     % get channel indices:
     chan_ind = varargin{1};
+    if ischar(chan_ind)
+        chan_ind = {chan_ind};
+    end
+    if iscell(chan_ind)
+        chan_ind = find_elec(EEG, chan_ind);
+    end
+
     if length(varargin) > 1
         varargin = varargin(2:end);
         opts = struct(varargin{:});
