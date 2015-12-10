@@ -48,6 +48,13 @@ if ischar(opt) && strcmp(opt, 'mark')
                 'chaninfo', EEG.chaninfo, ...
                 'electrodes', 'on');
     end
+    
+    % use shorter keyword - color, that means markeredgecolor
+    if femp(opts, 'color')
+        opts.markeredgecolor = opts.color;
+        opts = rmfield(opts, 'color');
+    end
+    
 	tp = topo_scrapper(gca);
     % ADD rmfield below to remove options that markchans does not need
     markopt = struct_unroll(opts);
