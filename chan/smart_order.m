@@ -1,5 +1,6 @@
 function orderer = smart_order(EEG, varargin)
 
+% TODO - a little more universal maybe...
 
 opt.remove_chin = false;
 opt.remove_Cz = false;
@@ -7,7 +8,7 @@ if nargin > 0
     opt = parse_arse(varargin, opt);
 end
 
-% corr order does not make much sense
+% order channels
 orderer.order = [...
     fliplr([8, 10, 11, 6, 9, 12, 13, 14, 19, 18, 64, 17, 63]), ...
     [5, 2, 3, 60, 59, 57, 56, 58, 61, 1, 62],...
