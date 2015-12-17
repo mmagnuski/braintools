@@ -20,6 +20,7 @@ if ischar(opt) && strcmp(opt, 'locs')
                 'chaninfo', EEG.chaninfo);
 	tp = topo_scrapper(gca);
 end
+
 if ischar(opt) && strcmp(opt, 'mark')
 
     % get channel indices:
@@ -37,11 +38,19 @@ if ischar(opt) && strcmp(opt, 'mark')
     else
         opts = struct();
     end
+    
+    if femp(opts, 'maplimits')
+        topo_opt.maplimits = opts.maplimits;
+        opts = rmfield(opts, 'maplimits');
+    else
+        topo_opt.maplimits = 'absmax';
+    end
 
     if femp(opts, 'val')
-        topoplot(opts.val, EEG.chanlocs, 'style', 'fill', ...
+        topo_opt = struct_unroll(topo_opt);
+        topoplot(opts.val, EEG.chanlocs, ...
                 'chaninfo', EEG.chaninfo, ...
-                'electrodes', 'on');
+                'electrodes', 'on', topo_opt{:});
         opts = rmfield(opts, 'val');
     else
         topoplot([], EEG.chanlocs, 'style', 'blank', ...
@@ -63,5 +72,5 @@ if ischar(opt) && strcmp(opt, 'mark')
     tp = rmfield(tp, 'elec_marks');
 end
 if isnumeric(opt)
-    topoplot(EEG.chanlocs, opt(:));
+    topoplot(opt(:), EEG.chanlocs);
 end
