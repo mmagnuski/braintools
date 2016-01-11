@@ -1040,8 +1040,8 @@ switch opt.MapEdge
         Lims = [-L, L];
     otherwise % assuming 'lin'
         % linear scaling - we may need to trim the colormap
-        
-        if absLims(1) < absLims(2)
+        limdif = absLims(1) - absLims(2);
+        if limdif < -0.0000001
             % lower limit is closer to the MapCent
             % we will need to trim the beginning of
             % the colormap! (so that the middle of CMap
@@ -1050,7 +1050,7 @@ switch opt.MapEdge
             TrimMap = round((1 - LimRat) * HalfMap);
             CMap = CMap(TrimMap:end,:);
             opt.MapLen = size(CMap, 1);
-        elseif absLims(1) > absLims(2)
+        elseif limdif > 0.0000001
             % upper limit is closer to the MapCent
             % we will need to trim the end of
             % the colormap! (so that the middle of CMap
