@@ -16,7 +16,7 @@ classdef explore_data < handle
     % obj.opt.xaxis
     
     methods
-        function obj = explore_stuff(EEG, t_val, varargin)
+        function obj = explore_data(EEG, t_val, varargin)
             
             % add support for stat
             if isstruct(t_val)
