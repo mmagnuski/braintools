@@ -827,7 +827,6 @@ if ~isempty(opt.Time)
             % CHANGE - here we just set the XData and let
             % MATLAB do the rest (positioning of ticks and
             % tick values)
-            % if you do this, lines dissapear (MZ)
             set(handles.image, 'XData', [opt.Time(1), opt.Time(end)]);
             set(handles.axis, 'XLim', [opt.Time(1), opt.Time(end)]);
             
@@ -881,6 +880,18 @@ if ~isempty(opt.Freq)
             'vector and your matrix size along 1st dimension ',...
             'are different. Labeling aborted :(']);
     else
+        % set YData 
+        % CHANGE (this should interact with ContinuousFreq ?
+        set(handles.image, 'YData', opt.Freq([1, end]));
+        set(handles.axis, 'YLim', [opt.Freq(1), opt.Freq(end)]);
+            
+            % set mask YData:
+            % CHANGE - if NoTransp, this should not be done:
+            if ~opt.NoTransp
+                for i = 1:length(handles.mask)
+                    set(handles.mask{i}, 'YData', opt.Freq([1, end]));
+                end
+            end
         if isempty(opt.JumpFreq)
             % ==No JumpFreq, generating==
             labind = round(linspace(1, len, opt.NumFreq+1));
@@ -912,7 +923,7 @@ if ~isempty(opt.Freq)
         
         labs = cellfun(@(x) [x, addHz], labs, 'UniformOutput',...
             false);
-        set(handles.axis, 'YTick', labind, 'YTickLabel',...
+        set(handles.axis, 'YTick', opt.Freq(labind), 'YTickLabel',...
             labs, 'TickLength', [0.02 0.02], ...
             'TickDir', 'out', 'Layer', 'top', 'Box', 'off');
     end
