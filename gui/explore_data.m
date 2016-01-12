@@ -27,17 +27,23 @@ classdef explore_data < handle
                 obj.opt.hasstat = false;
             end
             
-            if nargin > 3
-                obj.fun.chan = varargin{1};
-            else
-                obj.fun.chan = [];
+            obj.opt.xaxis = [];
+            obj.opt.yaxis = [];
+            obj.opt.maskx = [];
+            obj.opt.masky = [];
+            
+            obj.opt.max_map = 0.001;
+            obj.opt.proportional_scale = true;
+            
+            if nargin > 2
+                obj.opt = parse_arse(varargin, obj.opt);
             end
 
             % init - topofigure
             obj.h.f1 = figure('units', 'normalized'); 
             obj.h.ax1 = axes('Parent', obj.h.f1);
             obj.dims = length(size(t_val));
-            obj.opt.t_threshold = 1.8;
+            % obj.opt.t_threshold = 1.8;
             obj.opt.current_electrode = 1;
             obj.opt.current_electrode_h = [];
             
@@ -54,13 +60,19 @@ classdef explore_data < handle
             end
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', ...
-                @(o, e) obj.show_elec(o));
+                @(o, e) obj.show_elec());
             
             obj.EEG = EEG;
             obj.t = t_val;
-            obj.last_str = '300 450';
             obj.h.f2 = figure; obj.h.ax2 = axes('Parent', obj.h.f2,...
-                'Position', [0.1, 0.15 0.86, 0.75]);
+                'Position', [0.1, 0.15 0.8, 0.75]);
+            
+            all_points = numel(t_val);
+            obj.opt.max_val = max(t_val(:));
+            % obj.opt.max_val = obj.opt.max_val(round(all_points * 0.99));
+            obj.h.scale_axis = axes('Parent', obj.h.f2, 'Position', ...
+                [0.92, 0.15, 0.06, 0.75], 'XTick', [], ...
+                'YTick', [], 'YLim', [0, obj.opt.max_val]);
 
 %             dropdown for effects
 %             obj.h.drpdwn = uicontrol('style', 'popupmenu' , 'string', ...
@@ -70,12 +82,30 @@ classdef explore_data < handle
 %                 @(o, e) obj.change_effect(), 'value', 1);
 
             obj.refresh_effect();
-% 
-%             'callback', ...
-%                 @(o, e) obj.refresh_patch(), 'value', 1);
-            
+
+            % find handle to the image
+            chldr = get(gca, 'Children');
+            chldr_type = get(chldr, 'type');
+            im_chldr = find(strcmp('image', chldr_type));
+            obj.h.image = chldr(im_chldr(end));
+            obj.h.mask = chldr(im_chldr(1));
+
+            if isempty(obj.opt.xaxis)
+                obj.opt.xaxis = get(obj.h.image, 'XData');
+                obj.opt.maskx = get(obj.h.mask, 'XData');
+            end
+            if isempty(obj.opt.yaxis)
+                obj.opt.yaxis = get(obj.h.image, 'YData');
+                obj.opt.masky = get(obj.h.mask, 'YData');
+            end
+            obj.opt.xdiff = diff(obj.opt.xaxis([1,2]));
+            obj.opt.ydiff = diff(obj.opt.yaxis([1,2]));
+            obj.opt.patch = [];
+
+            set(obj.h.f2, 'WindowButtonDownFcn', ...
+                @(o,e) obj.turn_selection_on());
+
             obj.h.f3 = []; obj.h.ax3 = [];
-            obj.draw_patch();
         end
         
         
@@ -83,23 +113,23 @@ classdef explore_data < handle
             obj.h.patch = patch('Parent', obj.h.ax2, 'vertices', [1,1,0,0; 1,0,1,0]',...
                 'Faces', 1:4, 'Visible', 'off', 'FaceAlpha', 0.3);
         end
-
-        function refresh_patch(obj)
-            strval = get(obj.h.winlims, 'String');
-            if isequal(obj.last_str, strval)
-                return
+        
+        function turn_selection_on(obj)
+            cursor_pos = get(obj.h.ax2, 'currentpoint');
+            cursor_pos = cursor_pos(1,1:2);
+            xlm = get(obj.h.ax2, 'XLim');
+            ylm = get(obj.h.ax2, 'YLim');
+            
+            if cursor_pos(1) > xlm(1) && ...
+                    cursor_pos(1) < xlm(2) && ...
+                    cursor_pos(2) > ylm(1) && ...
+                    cursor_pos(2) < ylm(2)
+                set(obj.h.f2, 'WindowButtonMotionFcn', ...
+                    @(o,e) obj.modif_range());
+                set(obj.h.f2, 'WindowButtonUpFcn', ...
+                    @(o,e) obj.on_release_activate_range());
+                set(obj.h.f2, 'WindowButtonDownFcn', '');
             end
-            obj.last_str = strval;
-            xlim = str2num(strval); %#ok<ST2NM>
-            xlim = xlim(1:2);
-            ylim = get(obj.h.ax2, 'ylim');
-            set(obj.h.patch, 'Visible', 'on', 'Vertices', ...
-                [xlim, fliplr(xlim); ylim([1,1,2,2])]', 'Faces', 1:4);
-            % draw topoplot
-            sample_range = find_range(obj.EEG.times, xlim);
-            val = mean(obj.t(:, sample_range(1):sample_range(2), ...
-                obj.opt.current_effect), 2);
-            obj.refresh_topo(val);
         end
 
         function refresh_topo(obj, val)
@@ -128,8 +158,8 @@ classdef explore_data < handle
 
             % change color
             if ~isempty(obj.opt.current_electrode_h)
-                try
-                delete(obj.opt.current_electrode_h);
+                try %#ok<TRYNC>
+                    delete(obj.opt.current_electrode_h);
                 end
             end
 
@@ -140,28 +170,38 @@ classdef explore_data < handle
             obj.opt.current_electrode_h = sc;
 
             obj.opt.current_electrode = chan_ind;
-            if obj.dims > 3
-                obj.refresh_effect();
-            else
-                obj.refresh_chanplot();
-            end
+            obj.refresh_effect();
         end
         
         function out = pos2vert(obj)
             % find closest x and y for start and fin
+            x = sort([obj.opt.patch_start(1), obj.opt.patch_end(1)]);
+            y = sort([obj.opt.patch_start(2), obj.opt.patch_end(2)]);
+            x = find_range(obj.opt.xaxis, x);
+            y = find_range(obj.opt.yaxis, y);
             
-            out = [pstart; ...
-                pend(1), pstart(2); ...
-                pend; ...
-                pstart(1), pend(2)];
+            obj.opt.xsel = x;
+            obj.opt.ysel = y;
+            
+            x = obj.opt.xaxis(x);
+            y = obj.opt.yaxis(y);
+            
+            % snap values to grid (assumes grid is linear)
+            x = x + (obj.opt.xdiff * [-1, 1]) / 2; 
+            y = y + (obj.opt.ydiff * [-1, 1]) / 2;
+            
+            out = [x([1, 2, 2, 1])', y([1, 1, 2, 2])'];
         end
         
         function modif_range(obj)
             
-            cursor_pos = get(gca, 'currentpoint');
+            cursor_pos = get(obj.h.ax2, 'currentpoint');
             cursor_pos = cursor_pos(1,1:2);
             if ~obj.opt.patch_on
                 obj.opt.patch_on = true;
+                if ~isempty(obj.opt.patch)&& ishandle(obj.opt.patch)
+                    delete(obj.opt.patch);
+                end
                 obj.opt.patch_start = cursor_pos;
                 obj.opt.patch_end = cursor_pos;
                 vert = obj.pos2vert();
@@ -172,11 +212,31 @@ classdef explore_data < handle
             else
                 obj.opt.patch_end = cursor_pos;
                 vert = obj.pos2vert();
-                 %## !!! ##
-                set(obj.opt.patch, 'XData', 666);
+                set(obj.opt.patch, 'XData', vert(:,1));
+                set(obj.opt.patch, 'YData', vert(:,2));
+                set(obj.opt.patch, 'Vertices', vert);
                   
             end
         end
+        
+        function on_release_activate_range(obj)
+            if obj.opt.patch_on
+                % turn off mouse tracking
+                set(obj.h.f2, 'WindowButtonMotionFcn', '');
+                set(obj.h.f2, 'WindowButtonUpFcn', '');
+                
+                obj.opt.patch_on = false;
+                x = obj.opt.xsel;
+                y = obj.opt.ysel;
+                
+                mean_val = squeeze(mean(mean(...
+                    obj.t(y(1):y(2), x(1):x(2), :),1),2))';
+                obj.refresh_topo(mean_val);
+                set(obj.h.f2, 'WindowButtonDownFcn', ...
+                    @(o,e) obj.turn_selection_on());
+            end
+        end
+
 %         function change_effect(obj)
 %             neweff = get(obj.h.drpdwn, 'Value');
 %             if ~(obj.opt.current_effect == neweff)
@@ -187,6 +247,7 @@ classdef explore_data < handle
         
         function refresh_effect(obj)
             cla(obj.h.ax2);
+            axes(obj.h.ax2);
             if obj.dims == 4
                 t = squeeze(obj.t(:, :, obj.opt.current_electrode, ...
                     obj.opt.current_effect)); %#ok<*PROP>
@@ -199,35 +260,43 @@ classdef explore_data < handle
                 % mask = abs(t) > obj.opt.t_threshold;
                 mask = [];
             end
+            
+            if isempty(obj.opt.xaxis)
+                obj.opt.xaxis = 1:size(t_val, 2);
+            end
+            if isempty(obj.opt.yaxis)
+                obj.opt.yaxis = 1:size(t_val, 1);
+            end
+            mx = obj.opt.max_map;
+            if obj.opt.proportional_scale
+                mx = sort(t(:));
+                tlen = length(t(:));
+                mx = mx(round(tlen*0.99));
+            end
+            obj.opt.local_max_val = mx;
             maskitsweet(t, mask, ...
                 'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
-                'Time', obj.opt.xaxis, 'nosig', 0.75, ...
-                'CMin', 0, 'CMax', 0.001, 'CMap', hot(256), ...
+                'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
+                'nosig', 0.75, ...
+                'CMin', 0, 'CMax', mx, 'CMap', hot(256), ...
                 'MapEdge', 'lin', 'MapCent', []);
-            % redraw patch
-            obj.last_str = '';
-            obj.draw_patch();
+            obj.opt.patch_on = false;
+            obj.opt.patch = [];
+            
+            obj.refresh_scale();
         end
         
-        function refresh_chanplot(obj)
-            % create chan figure if absent
-            if isempty(obj.h.f3) || ~ishandle(obj.h.f3)
-                obj.h.f3 = figure;
-                obj.h.ax3 = axes;
-            else
-                axes(obj.h.ax3);
-                cla;
-            end
-            
-            % plot with default if no chanfun
-            if ~isempty(obj.fun.chan)
-                obj.fun.chan(obj.h.f3, obj.opt.current_electrode);
-            else
-                plot(obj.EEG.times, obj.t(obj.opt.current_electrode, :, ...
-                    obj.opt.current_effect), 'linewidth', 2, ...
-                    'linesmoothing', 'on');
-            end
-            
+        function refresh_scale(obj)
+            cla(obj.h.scale_axis);
+            image(reshape(hot(256), [256, 1, 3]), ...
+                'Parent', obj.h.scale_axis, ...
+                'XData', [0, 0.1], 'YData', ...
+                [0, obj.opt.local_max_val]);
+
+            set(obj.h.scale_axis, 'YDir', 'normal');
+            set(obj.h.scale_axis, 'YTick', []);
+            set(obj.h.scale_axis, 'XTick', []);
+            set(obj.h.scale_axis, 'YLim', [0, obj.opt.max_val]);
         end
     end
 end
