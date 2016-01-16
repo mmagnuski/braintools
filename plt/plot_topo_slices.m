@@ -20,6 +20,8 @@ opt.markersize    = 6;
 opt.markerlw      = 0.5;
 opt.toposhapelw   = 0.75;
 opt.topocontourlw = 0.1;
+opt.electreshold  = 0.2;
+opt.freq = [];
 
 % check timeunits
 opt.timeunits = 'ms';
@@ -29,6 +31,24 @@ end
 
 if nargin > 5
 	opt = parse_arse(varargin, opt);
+end
+
+% check dimensions of stat - if more than 2d - we need to reduce
+moredims = false;
+if ndims(stat.stat) > 2
+	moredims = true;
+	dims = strsep(stat.dimord, '_');
+	whichfreq = find(strcmp(dims, 'freq'));
+	if ~isempty(opt.freq)
+		freqr = find_range(stat.freq, opt.freq);
+		freqr = freqr(1):freqr(2);
+		stat.stat = squeeze(mean(stat.stat(:, freqr, :), whichfreq));
+		for c = 1:length(clst)
+			clst(c).boolmat = squeeze(mean(clst(c).boolmat(:, freqr, :), whichfreq));
+		end
+	else
+		error('your data has more than 2 dimensions but freq was not specified');
+	end
 end
 
 timstr = '%d - %d ms';
@@ -88,7 +108,13 @@ for t = 1:size(twin.samples, 1)
 	delete(h.elec_marks);
 	for c = 1:length(clst)
 		% find cluster-participating electrodes
-        elecs = find(sum(clst(c).boolmat(:,win), 2) > 0);
+		if moredims
+			elecs = find(mean(clst(c).boolmat(:,win), 2) > opt.electreshold);
+		else
+			% ADD - if electreshold defined - 
+			% take mean and compare to tresh
+	        elecs = find(sum(clst(c).boolmat(:,win), 2) > 0);
+	    end
 
 		if isempty(elecs)
 			continue
