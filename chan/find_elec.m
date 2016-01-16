@@ -1,4 +1,4 @@
-function electrodes_id = eeg_findelec(EEG, electrodes)
+function electrodes_id = find_elec(EEG, electrodes)
 
 % finds electrode indices from electrode labels
 % works both for EEGlab and FieldTrip formats
@@ -10,7 +10,9 @@ function electrodes_id = eeg_findelec(EEG, electrodes)
 % ADD tolerance to absent electrodes
 
 % test if numerical
-if isnumeric(electrodes)
+if isempty(electrodes)
+    electrodes = true;
+elseif isnumeric(electrodes)
     error(['The electrodes are already',...
         ' numeric as if representing electrode indices']);
 else
@@ -43,6 +45,11 @@ elseif iscell(EEG)
     lb = EEG;
 else
     error('Unrecognized first input.')
+end
+
+if islogical(electrodes)
+    electrodes_id = lb;
+    return
 end
 
 if ~num

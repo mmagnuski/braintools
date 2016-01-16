@@ -31,6 +31,10 @@ function h = topo_scrapper(ax)
 %     tp = topo_scrapper(gca);
 %     delete(tp.nose);
 
+if ~exist('ax', 'var') || isempty(ax) || ...
+        ~ishandle(ax)
+    ax = gca;
+end
 
 % get children:
 chld = get(ax, 'Children');
