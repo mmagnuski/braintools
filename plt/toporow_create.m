@@ -4,6 +4,8 @@ function ax = toporow_create(fig, hlims, uplim, ntopo)
 % images given constraints
 % The axes have equal axis length
 %
+% ax = toporow_create(fig, hlims, uplim, ntopo)
+%
 % hlims - left, between_topo, right
 
 % get pixel values

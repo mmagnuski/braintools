@@ -5,6 +5,9 @@ function plot_topo_slices(stat, clst, twin, ax, locs, varargin)
 % 
 % plot_topo_slices(stat, clst, twin, ax, locs)
 %
+% twin - structure containing:
+%     .samples - sample limits of time windows
+%     .times - time limits of time windows
 
 % TODOs:
 % [ ] - check chan overlap
