@@ -33,15 +33,15 @@ classdef project < handle
             % clears base variables not protected by the project
             except_vars = strsep(obj.protected, ' ');
             com = ['clearvars -except ', except_vars];
-            evalin('caller', com);
+            evalin('base', com);
         end
-        
+
         function addp(obj, label)
             if isfield(obj.paths, label)
-                addpath(obj.paths.(label){:});
+                addpath(get_valid_path(obj.paths.(label)));
             end
         end
-        
+
         function pth = pth(obj, label, pth)
             ifpth = exist('pth', 'var');
             
