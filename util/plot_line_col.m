@@ -1,13 +1,15 @@
-function plot_line_col(t, lines, col, opts)
+function hl = plot_line_col(t, lines, col, opts)
 
 gca;
 hold on;
+hl = [];
+
 if exist('opts', 'var')
     for l = 1:size(lines,2)
-        plot(t, lines(:, l), 'color', col(l, :), opts{:});
+        hl(l) = plot(t, lines(:, l), 'color', col(l, :), opts{:}); %#ok<*AGROW>
     end
 else
     for l = 1:size(lines,2)
-        plot(t, lines(:, l), 'color', col(l, :));
+        hl(l) = plot(t, lines(:, l), 'color', col(l, :));
     end
 end    

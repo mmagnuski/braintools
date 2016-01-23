@@ -67,7 +67,7 @@ classdef explore_data < handle
             obj.h.f2 = figure; obj.h.ax2 = axes('Parent', obj.h.f2,...
                 'Position', [0.1, 0.15 0.8, 0.75]);
             
-            all_points = numel(t_val);
+            % all_points = numel(t_val);
             obj.opt.max_val = max(t_val(:));
             % obj.opt.max_val = obj.opt.max_val(round(all_points * 0.99));
             obj.h.scale_axis = axes('Parent', obj.h.f2, 'Position', ...
