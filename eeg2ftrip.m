@@ -91,9 +91,13 @@ switch fieldbox
           if ~(zeroev > length(EEG.urevent))
               noepinf = false;
           origlat = EEG.urevent(zeroev).latency;
+          try
           data.sampleinfo(index, 1) = samptimes(1) + origlat;
           data.sampleinfo(index, 2) = samptimes(end) + origlat;
           lastsamp = data.sampleinfo(index, 2);
+          end % catch - weird error with windowed data, empty origlat because
+              % the urevent is probably bad, will have to look into
+              % onesecepoch
           end
       end
       if noepinf
