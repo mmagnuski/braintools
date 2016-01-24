@@ -10,7 +10,6 @@ if ~exist('min_chan', 'var')
 end
 pos = data > thresh;
 clust = findcluster(pos, chanconn, min_chan);
-
 vals = compute_cluster_val(clust, data, @sum);
 if ~isempty(vals)
 	pos = max(vals);
@@ -21,7 +20,6 @@ end
 % cluster negative eff
 neg = data < (thresh * -1);
 clust = findcluster(neg, chanconn, min_chan);
-
 vals = compute_cluster_val(clust, data, @sum);
 if ~isempty(vals)
 	neg = min(vals);
