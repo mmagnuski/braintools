@@ -32,6 +32,12 @@ classdef explore_data < handle
             obj.opt.maskx = [];
             obj.opt.masky = [];
             
+            obj.opt.thresh = '10%';
+            obj.opt.chanconn = [];
+            obj.opt.clusters = [];
+            obj.opt.clustermask = [];
+            obj.opt.minchan = 0;
+            
             obj.opt.max_map = 0.001;
             obj.opt.proportional_scale = true;
             
@@ -106,6 +112,20 @@ classdef explore_data < handle
                 @(o,e) obj.turn_selection_on());
 
             obj.h.f3 = []; obj.h.ax3 = [];
+            
+            % add cluster button
+            obj.h.cluster_button = uicontrol('parent', obj.h.f2, ...
+                'style', 'pushbutton', 'units', 'normalized', ...
+                'position', [0.75, 0.01, 0.2, 0.065], 'string', ...
+                'cluster', 'callback', @(o,e) obj.cluster());
+            obj.h.tresh_box = uicontrol('parent', obj.h.f2, ...
+                'style', 'edit', 'units', 'normalized', ...
+                'position', [0.5, 0.01, 0.2, 0.065], 'string', ...
+                '10%', 'callback', @(o,e) obj.set_tresh());
+            obj.h.minchan_box = uicontrol('parent', obj.h.f2, ...
+                'style', 'edit', 'units', 'normalized', ...
+                'position', [0.25, 0.01, 0.2, 0.065], 'string', ...
+                '0', 'callback', @(o,e) obj.set_minchan());
         end
         
         
@@ -254,13 +274,21 @@ classdef explore_data < handle
             else
                 t = obj.t(:, :, obj.opt.current_electrode);
             end
-            if obj.opt.hasstat
-                mask = get_cluster_mask(obj.stat, 0.05);
-            else
-                % mask = abs(t) > obj.opt.t_threshold;
-                mask = [];
-            end
             
+            % this should change
+%             if obj.opt.hasstat
+%                 mask = get_cluster_mask(obj.stat, 0.05);
+%             else
+%                 % mask = abs(t) > obj.opt.t_threshold;
+%                 mask = [];
+%             end
+            
+            if isempty(obj.opt.clustermask)
+                msk = [];
+            else
+                msk = squeeze(obj.opt.clustermask(...
+                    obj.opt.current_electrode,:,:));
+            end
             if isempty(obj.opt.xaxis)
                 obj.opt.xaxis = 1:size(t_val, 2);
             end
@@ -274,7 +302,7 @@ classdef explore_data < handle
                 mx = mx(round(tlen*0.99));
             end
             obj.opt.local_max_val = mx;
-            maskitsweet(t, mask, ...
+            maskitsweet(t, msk, ...
                 'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
                 'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
                 'nosig', 0.75, ...
@@ -297,6 +325,41 @@ classdef explore_data < handle
             set(obj.h.scale_axis, 'YTick', []);
             set(obj.h.scale_axis, 'XTick', []);
             set(obj.h.scale_axis, 'YLim', [0, obj.opt.max_val]);
+        end
+        
+        function cluster(obj)
+            if isempty(obj.opt.chanconn)
+                obj.opt.chanconn = get_chanconn(obj.EEG, 'EGI64');
+            end
+            
+            % check if %
+            ifperc = strfind(obj.opt.thresh, '%');
+            if ifperc
+                val = obj.opt.thresh;
+                val(ifperc) = [];
+                val = str2num(val)/100; %#ok<ST2NM>
+                
+                len = numel(obj.t);
+                smp = round(val * len);
+                smp = max(1, smp);
+                
+                t_unrl = sort(obj.t(:), 'descend');
+                thresh = t_unrl(smp);
+                
+                data = permute(obj.t, [3, 1, 2]);
+                obj.opt.clusters = findcluster(data >= thresh, ...
+                    obj.opt.chanconn, obj.opt.minchan);
+                obj.opt.clustermask = obj.opt.clusters > 0;
+                obj.refresh_effect();
+            end
+        end
+        
+        function set_tresh(obj)
+            obj.opt.thresh = get(obj.h.tresh_box, 'String');
+        end
+
+        function set_minchan(obj)
+            obj.opt.minchan = str2num(get(obj.h.minchan_box, 'string')); %#ok<ST2NM>
         end
     end
 end
