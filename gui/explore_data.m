@@ -32,6 +32,7 @@ classdef explore_data < handle
             obj.opt.maskx = [];
             obj.opt.masky = [];
             
+            obj.opt.captype = 'EGI64';
             obj.opt.thresh = '10%';
             obj.opt.chanconn = [];
             obj.opt.clusters = [];
@@ -329,7 +330,7 @@ classdef explore_data < handle
         
         function cluster(obj)
             if isempty(obj.opt.chanconn)
-                obj.opt.chanconn = get_chanconn(obj.EEG, 'EGI64');
+                obj.opt.chanconn = get_chanconn(obj.EEG, obj.opt.captype);
             end
             
             % check if %
