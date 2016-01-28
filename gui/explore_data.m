@@ -71,6 +71,14 @@ classdef explore_data < handle
             
             obj.EEG = EEG;
             obj.t = t_val;
+            if any(obj.t(:) < 0)
+                obj.opt.negative_values = true;
+                obj.opt.cmap = jet(256);
+            else
+                obj.opt.negative_values = false;
+                obj.opt.cmap = hot(256);
+            end
+            
             obj.h.f2 = figure; obj.h.ax2 = axes('Parent', obj.h.f2,...
                 'Position', [0.1, 0.15 0.8, 0.75]);
             
@@ -302,12 +310,20 @@ classdef explore_data < handle
                 tlen = length(t(:));
                 mx = mx(round(tlen*0.99));
             end
+            if obj.opt.negative_values
+                mn = sort(t(:));
+                tlen = length(t(:));
+                minv = mn(round(tlen*0.01));
+            else
+                minv = 0;
+            end
+                
             obj.opt.local_max_val = mx;
             maskitsweet(t, msk, ...
                 'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
                 'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
                 'nosig', 0.75, ...
-                'CMin', 0, 'CMax', mx, 'CMap', hot(256), ...
+                'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap, ...
                 'MapEdge', 'lin', 'MapCent', []);
             obj.opt.patch_on = false;
             obj.opt.patch = [];
