@@ -314,13 +314,15 @@ classdef explore_data < handle
             mx = obj.opt.max_map;
             if obj.opt.proportional_scale
                 mx = sort(t(:));
-                tlen = length(t(:));
+                mx = mx(~isnan(mx));
+                tlen = length(mx);
                 mx = mx(round(tlen*0.99));
             end
             if obj.opt.negative_values
                 mn = sort(t(:));
-                tlen = length(t(:));
-                minv = mn(round(tlen*0.01));
+                mn = mn(~isnan(mx));
+                tlen = length(mn);
+                minv = mn(max([1, round(tlen*0.01)]));
             else
                 minv = 0;
             end
