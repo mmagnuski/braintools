@@ -113,9 +113,16 @@ classdef explore_data < handle
                 obj.opt.yaxis = get(obj.h.image, 'YData');
                 obj.opt.masky = get(obj.h.mask, 'YData');
             end
-            obj.opt.xdiff = diff(obj.opt.xaxis([1,2]));
-            obj.opt.ydiff = diff(obj.opt.yaxis([1,2]));
+            obj.opt.xdiff = mean(diff(obj.opt.xaxis));
+            obj.opt.ydiff = mean(diff(obj.opt.yaxis));
             obj.opt.patch = [];
+
+            % use linear axis info - XData and YData
+            % assume linear progression
+            obj.opt.linxaxis = linspace(obj.opt.xaxis(1), ...
+                obj.opt.xaxis(end), length(obj.opt.xaxis));
+            obj.opt.linyaxis = linspace(obj.opt.yaxis(1), ...
+                obj.opt.yaxis(end), length(obj.opt.yaxis));
 
             set(obj.h.f2, 'WindowButtonDownFcn', ...
                 @(o,e) obj.turn_selection_on());
@@ -206,15 +213,15 @@ classdef explore_data < handle
             % find closest x and y for start and fin
             x = sort([obj.opt.patch_start(1), obj.opt.patch_end(1)]);
             y = sort([obj.opt.patch_start(2), obj.opt.patch_end(2)]);
-            x = find_range(obj.opt.xaxis, x);
-            y = find_range(obj.opt.yaxis, y);
-            
+            x = find_range(obj.opt.linxaxis, x);
+            y = find_range(obj.opt.linyaxis, y);
+
             obj.opt.xsel = x;
             obj.opt.ysel = y;
-            
-            x = obj.opt.xaxis(x);
-            y = obj.opt.yaxis(y);
-            
+
+            x = obj.opt.linxaxis(x);
+            y = obj.opt.linyaxis(y);
+
             % snap values to grid (assumes grid is linear)
             x = x + (obj.opt.xdiff * [-1, 1]) / 2; 
             y = y + (obj.opt.ydiff * [-1, 1]) / 2;
