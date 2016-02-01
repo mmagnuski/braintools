@@ -264,8 +264,8 @@ classdef explore_data < handle
                 obj.opt.patch_on = false;
                 x = obj.opt.xsel;
                 y = obj.opt.ysel;
-                
-                mean_val = squeeze(mean(mean(...
+
+                mean_val = squeeze(nanmean(nanmean(...
                     obj.t(y(1):y(2), x(1):x(2), :),1),2))';
                 obj.refresh_topo(mean_val);
                 set(obj.h.f2, 'WindowButtonDownFcn', ...
