@@ -359,25 +359,52 @@ classdef explore_data < handle
             end
 
             % check if %
+            data = permute(obj.t, [3, 1, 2]);
             ifperc = strfind(obj.opt.thresh, '%');
-            if ifperc
+            if ifperc % TODO - if pos and neg!
                 val = obj.opt.thresh;
                 val(ifperc) = [];
                 val = str2num(val)/100; %#ok<ST2NM>
-                
-                len = numel(obj.t);
-                smp = round(val * len);
-                smp = max(1, smp);
-                
+
                 t_unrl = sort(obj.t(:), 'descend');
-                thresh = t_unrl(smp);
-                
-                data = permute(obj.t, [3, 1, 2]);
-                obj.opt.clusters = findcluster(data >= thresh, ...
-                    obj.opt.chanconn, obj.opt.minchan);
-                obj.opt.clustermask = obj.opt.clusters > 0;
-                obj.refresh_effect();
+                t_unrl = t_unrl(~isnan(t_unrl));
+
+                len = numel(t_unrl);
+
+                if ~obj.opt.negative_values
+                    smp = round(val * len);
+                    smp = max(1, smp);
+                    thresh = t_unrl(smp);
+
+                else
+                    smp = round(val/2 * len);
+                    smp = max(1, smp);
+                    thresh = [t_unrl(smp), t_unrl(end-smp+1)];
+                end
+            else
+                val = str2num(obj.opt.thresh); %#ok<ST2NM>
+                thresh = val;
+                if obj.opt.negative_values
+                    thresh = [thresh, -val];
+                end
             end
+
+            if ~obj.opt.negative_values
+                obj.opt.clusters = findcluster(data >= thresh(1), ...
+                    obj.opt.chanconn, obj.opt.minchan);
+            else
+
+                obj.opt.clusters = findcluster(data >= thresh(1), ...
+                    obj.opt.chanconn, obj.opt.minchan);
+                negclusters = findcluster(data <= thresh(2), ...
+                    obj.opt.chanconn, obj.opt.minchan);
+                lastClstNum = max(obj.opt.clusters(:));
+                negclusters = (negclusters + lastClstNum) .* uint32(negclusters > 0);
+                obj.opt.clusters = obj.opt.clusters + negclusters;
+            end
+
+            obj.opt.clustermask = obj.opt.clusters > 0;
+            obj.refresh_effect();
         end
 
         function set_tresh(obj)
