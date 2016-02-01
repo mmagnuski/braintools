@@ -1,5 +1,5 @@
 classdef explore_data < handle
-    
+
     % simple interface for exploring multi-dim EEG data
     properties
         h
@@ -12,12 +12,12 @@ classdef explore_data < handle
         topo
         EEG
     end
-    
+
     % obj.opt.xaxis
-    
+
     methods
         function obj = explore_data(EEG, t_val, varargin)
-            
+
             % add support for stat
             if isstruct(t_val)
                 obj.opt.hasstat = true;
@@ -26,22 +26,22 @@ classdef explore_data < handle
             else
                 obj.opt.hasstat = false;
             end
-            
+
             obj.opt.xaxis = [];
             obj.opt.yaxis = [];
             obj.opt.maskx = [];
             obj.opt.masky = [];
-            
+
             obj.opt.captype = 'EGI64';
             obj.opt.thresh = '10%';
             obj.opt.chanconn = [];
             obj.opt.clusters = [];
             obj.opt.clustermask = [];
             obj.opt.minchan = 0;
-            
+
             obj.opt.max_map = 0.001;
             obj.opt.proportional_scale = true;
-            
+
             if nargin > 2
                 obj.opt = parse_arse(varargin, obj.opt);
             end
@@ -53,7 +53,7 @@ classdef explore_data < handle
             % obj.opt.t_threshold = 1.8;
             obj.opt.current_electrode = 1;
             obj.opt.current_electrode_h = [];
-            
+
             obj.opt.patch_on = false;
             obj.opt.patch_start = [];
             obj.opt.patch_stop = [];
@@ -68,7 +68,7 @@ classdef explore_data < handle
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', ...
                 @(o, e) obj.show_elec());
-            
+
             obj.EEG = EEG;
             obj.t = t_val;
             if any(obj.t(:) < 0)
@@ -78,10 +78,10 @@ classdef explore_data < handle
                 obj.opt.negative_values = false;
                 obj.opt.cmap = hot(256);
             end
-            
+
             obj.h.f2 = figure; obj.h.ax2 = axes('Parent', obj.h.f2,...
                 'Position', [0.1, 0.15 0.8, 0.75]);
-            
+
             % all_points = numel(t_val);
             obj.opt.max_val = max(t_val(:));
             % obj.opt.max_val = obj.opt.max_val(round(all_points * 0.99));
@@ -121,7 +121,7 @@ classdef explore_data < handle
                 @(o,e) obj.turn_selection_on());
 
             obj.h.f3 = []; obj.h.ax3 = [];
-            
+
             % add cluster button
             obj.h.cluster_button = uicontrol('parent', obj.h.f2, ...
                 'style', 'pushbutton', 'units', 'normalized', ...
@@ -136,19 +136,19 @@ classdef explore_data < handle
                 'position', [0.25, 0.01, 0.2, 0.065], 'string', ...
                 '0', 'callback', @(o,e) obj.set_minchan());
         end
-        
-        
+
+
         function draw_patch(obj)
             obj.h.patch = patch('Parent', obj.h.ax2, 'vertices', [1,1,0,0; 1,0,1,0]',...
                 'Faces', 1:4, 'Visible', 'off', 'FaceAlpha', 0.3);
         end
-        
+
         function turn_selection_on(obj)
             cursor_pos = get(obj.h.ax2, 'currentpoint');
             cursor_pos = cursor_pos(1,1:2);
             xlm = get(obj.h.ax2, 'XLim');
             ylm = get(obj.h.ax2, 'YLim');
-            
+
             if cursor_pos(1) > xlm(1) && ...
                     cursor_pos(1) < xlm(2) && ...
                     cursor_pos(2) > ylm(1) && ...
@@ -201,7 +201,7 @@ classdef explore_data < handle
             obj.opt.current_electrode = chan_ind;
             obj.refresh_effect();
         end
-        
+
         function out = pos2vert(obj)
             % find closest x and y for start and fin
             x = sort([obj.opt.patch_start(1), obj.opt.patch_end(1)]);
@@ -221,9 +221,9 @@ classdef explore_data < handle
             
             out = [x([1, 2, 2, 1])', y([1, 1, 2, 2])'];
         end
-        
+
         function modif_range(obj)
-            
+
             cursor_pos = get(obj.h.ax2, 'currentpoint');
             cursor_pos = cursor_pos(1,1:2);
             if ~obj.opt.patch_on
@@ -244,16 +244,16 @@ classdef explore_data < handle
                 set(obj.opt.patch, 'XData', vert(:,1));
                 set(obj.opt.patch, 'YData', vert(:,2));
                 set(obj.opt.patch, 'Vertices', vert);
-                  
+
             end
         end
-        
+
         function on_release_activate_range(obj)
             if obj.opt.patch_on
                 % turn off mouse tracking
                 set(obj.h.f2, 'WindowButtonMotionFcn', '');
                 set(obj.h.f2, 'WindowButtonUpFcn', '');
-                
+
                 obj.opt.patch_on = false;
                 x = obj.opt.xsel;
                 y = obj.opt.ysel;
@@ -273,7 +273,7 @@ classdef explore_data < handle
 %                 obj.refresh_effect();
 %             end
 %         end
-        
+
         function refresh_effect(obj)
             cla(obj.h.ax2);
             axes(obj.h.ax2);
@@ -283,7 +283,7 @@ classdef explore_data < handle
             else
                 t = obj.t(:, :, obj.opt.current_electrode);
             end
-            
+
             % this should change
 %             if obj.opt.hasstat
 %                 mask = get_cluster_mask(obj.stat, 0.05);
@@ -291,7 +291,7 @@ classdef explore_data < handle
 %                 % mask = abs(t) > obj.opt.t_threshold;
 %                 mask = [];
 %             end
-            
+
             if isempty(obj.opt.clustermask)
                 msk = [];
             else
@@ -317,7 +317,7 @@ classdef explore_data < handle
             else
                 minv = 0;
             end
-                
+
             obj.opt.local_max_val = mx;
             maskitsweet(t, msk, ...
                 'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
@@ -327,10 +327,10 @@ classdef explore_data < handle
                 'MapEdge', 'lin', 'MapCent', []);
             obj.opt.patch_on = false;
             obj.opt.patch = [];
-            
+
             obj.refresh_scale();
         end
-        
+
         function refresh_scale(obj)
             cla(obj.h.scale_axis);
             image(reshape(hot(256), [256, 1, 3]), ...
@@ -343,12 +343,12 @@ classdef explore_data < handle
             set(obj.h.scale_axis, 'XTick', []);
             set(obj.h.scale_axis, 'YLim', [0, obj.opt.max_val]);
         end
-        
+
         function cluster(obj)
             if isempty(obj.opt.chanconn)
                 obj.opt.chanconn = get_chanconn(obj.EEG, obj.opt.captype);
             end
-            
+
             % check if %
             ifperc = strfind(obj.opt.thresh, '%');
             if ifperc
@@ -370,7 +370,7 @@ classdef explore_data < handle
                 obj.refresh_effect();
             end
         end
-        
+
         function set_tresh(obj)
             obj.opt.thresh = get(obj.h.tresh_box, 'String');
         end
