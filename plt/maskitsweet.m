@@ -844,10 +844,10 @@ if ~isempty(opt.Time)
                 % test opt.Freq
                 if isempty(opt.Freq)
                     halfdif = 1;
-                    ylim    = [1, size(matri, 1)];
+                    % ylim    = [1, size(matri, 1)];
                 else
                     halfdif = opt.Freq(2) - opt.Freq(1);
-                    ylim    = [opt.Freq(1), opt.Freq(end)];
+                    % ylim    = [opt.Freq(1), opt.Freq(end)];
                 end
                 
                 % check what values are on y axis
@@ -894,10 +894,8 @@ if ~isempty(opt.Freq)
             end
         if isempty(opt.JumpFreq)
             % ==No JumpFreq, generating==
-            labind = round(linspace(1, len, opt.NumFreq+1));
-            twofirst = [opt.Freq(labind(1)), opt.Freq(labind(2))];
-            opt.JumpFreq = round(abs(diff(twofirst)));
-            clear twofirst labind
+            opt.JumpFreq = round(mean(abs(diff(opt.Freq))));
+            clear labind
         end
         
         % ==JumpTime!==
@@ -923,7 +921,12 @@ if ~isempty(opt.Freq)
         
         labs = cellfun(@(x) [x, addHz], labs, 'UniformOutput',...
             false);
-        set(handles.axis, 'YTick', opt.Freq(labind), 'YTickLabel',...
+        
+        % set labels
+        % freq range may be unequal (log for example) while 
+        % YData imagines linear progression
+        imagined = linspace(opt.Freq(1), opt.Freq(end), length(opt.Freq));
+        set(handles.axis, 'YTick', imagined(labind), 'YTickLabel',...
             labs, 'TickLength', [0.02 0.02], ...
             'TickDir', 'out', 'Layer', 'top', 'Box', 'off');
     end
