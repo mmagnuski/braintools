@@ -7,6 +7,8 @@ function tp = topo(EEG, opt, varargin)
 % topo(EEG, 'mark', chans);
 % marks position of channels whose indices are 
 % in chans variable
+%
+% topo(EEG, 'mark', chans, 'val', val);
 
 % TODOs:
 % add more additional options like:
