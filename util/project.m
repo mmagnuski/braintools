@@ -42,10 +42,14 @@ classdef project < handle
             end
         end
 
-        function pth = pth(obj, label, pth)
+        function pth = pth(obj, label, pth, onpthlabel)
             ifpth = exist('pth', 'var');
+            ifonpth = exist('onpthlabel', 'var');
             
             if ifpth
+                if ifonpth
+                    pth = fullfile(obj.pth(onpthlabel), pth);
+                end
                 % check if label exists:
                 if ~iscell(pth)
                     pth = {pth};
