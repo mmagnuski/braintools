@@ -67,7 +67,27 @@ classdef project < handle
                 end
             end
         end
-        
+
+        function files = fls(obj, pthlabel, ext, expr)
+            hasext = exist('ext', 'var') && ~isempty(ext);
+            hasexp = exist('expr', 'var');
+
+            files = dir(obj.pth(pthlabel));
+            files = files(~[files.isdir]);
+            files = {files.name};
+            if hasext
+                corr_ext = false(length(files), 1);
+                for f = 1:length(files)
+                    [~, ~, thisext] = fileparts(files{f});
+                    corr_ext(f) = any(strcmp(thisext, ext)) ...
+                        || any(strcmp(thisext(2:end), ext));
+                end
+                files = files(corr_ext);
+            end
+        end
+
+
+
         function cd(obj, label)
             if isfield(obj.paths, label)
                 cd(get_valid_path(obj.paths.(label)));
@@ -83,8 +103,9 @@ classdef project < handle
         end
         
         function out = subsref(obj, s)
-            methodnames = {'op', 'protect', 'cl', 'cd', 'pth', 'addp'};
-            output = logical([0, 0, 0, 0, 1, 0]);
+            methodnames = {'op', 'protect', 'cl', 'cd', ...
+                'fls', 'pth', 'addp'};
+            output = logical([0, 0, 0, 0, 1, 1, 0]);
             if length(s) == 1 && strcmp(s.type, '()')
                 if isfield(obj.paths, s.subs{1})
                     out = get_valid_path(obj.paths.(s.subs{1}));
