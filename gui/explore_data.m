@@ -355,7 +355,7 @@ classdef explore_data < handle
 
         function cluster(obj)
             if isempty(obj.opt.chanconn)
-                obj.opt.chanconn = get_chanconn(obj.EEG, obj.opt.captype);
+                obj.opt.chanconn = get_chanconn(obj.opt.captype, obj.EEG);
             end
 
             % check if %
