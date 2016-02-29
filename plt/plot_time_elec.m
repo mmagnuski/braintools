@@ -38,7 +38,7 @@ end
 
 
 % cluster colors
-if femp(opt, 'colors') && logical(opt.colors) && opt.colors
+if femp(opt, 'colors') && islogical(opt.colors) && opt.colors
     [~, opt.colors] = color_clusters(clst);
 end
 
