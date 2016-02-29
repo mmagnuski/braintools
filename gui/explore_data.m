@@ -59,7 +59,7 @@ classdef explore_data < handle
             obj.opt.patch_stop = [];
 
             % plot electrodes
-            if obj.dims > 3 % this could work for 2D too, based on stat
+            if obj.dims > 2 % this could work for 2D too, based on stat
                 topoplot([], EEG.chanlocs, 'style', 'blank', ...
                     'electrodes', 'labelpoint');
             else
@@ -151,6 +151,7 @@ classdef explore_data < handle
         end
 
         function turn_selection_on(obj)
+            disp(get(obj.h.f2, 'selectiontype'));
             cursor_pos = get(obj.h.ax2, 'currentpoint');
             cursor_pos = cursor_pos(1,1:2);
             xlm = get(obj.h.ax2, 'XLim');

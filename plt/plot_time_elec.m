@@ -10,6 +10,7 @@ function h = plot_time_elec(stat, varargin)
 % pval   - significance threshold
 % ax     - axis to plot in
 % colors - cluster colors
+% order  - how to order channels
 
 opt.pval = 0.05;
 opt.ax = gca;
@@ -17,6 +18,7 @@ opt.nosig = 0.75;
 opt.colors = [];
 opt.remove_chin = false;
 opt.remove_Cz = false;
+opt.order = true;
 
 if ~isempty(varargin)
     opt = parse_arse(varargin, opt);
@@ -44,9 +46,13 @@ end
 
 
 % get electrode ordering
-ord = smart_order(stat, opt);
-val = stat.stat(ord.order,:);
-mask = mask(ord.order,:);
+if opt.order
+    ord = smart_order(stat, opt);
+    val = stat.stat(ord.order,:);
+    mask = mask(ord.order,:);
+else
+    val = stat.stat;
+end
 
 
 % maskitsweet
@@ -80,15 +86,16 @@ set(gca, 'FontSize', tickFont);
 xlabel('Time (seconds)', 'FontSize', labFont);
 
 % get tick pos for y:
-lims = [ord.front_lim', ...
-            ord.mid_lim', ...
-            ord.back_lim'];
-Ytickpos = mean(lims, 1);
+if opt.order
+    lims = [ord.front_lim', ...
+                ord.mid_lim', ...
+                ord.back_lim'];
+    Ytickpos = mean(lims, 1);
 
-% label y axis:
-set(gca, 'YTick', Ytickpos);
-set(gca, 'YTickLabel', {'anterior', 'central', 'posterior'});
-
+    % label y axis:
+    set(gca, 'YTick', Ytickpos);
+    set(gca, 'YTickLabel', {'anterior', 'central', 'posterior'});
+end
 % add division lines:
 X = get(gca, 'XLim');
 for i = 1:2
