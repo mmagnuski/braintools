@@ -70,13 +70,22 @@ end
 % get electrode positions:
 flds = {'elec_pos', 'elec_pos2'; ...
 		'elec_marks', 'elec_marks2'};
+
+try
 for i = 1:length(elcs)
 	h.(flds{1, i})    = [...
 		get(h.(flds{2,i}), 'X')', ...
 		get(h.(flds{2,i}), 'Y')', ...
 		get(h.(flds{2,i}), 'Z')'];
 end
-
+catch
+    for i = 1:length(elcs)
+    h.(flds{1, i})    = [...
+		get(h.(flds{2,i}), 'XData')', ...
+		get(h.(flds{2,i}), 'YData')', ...
+		get(h.(flds{2,i}), 'ZData')'];
+    end
+end
 h.one_elec_group = length(elcs) == 1;
 
 
