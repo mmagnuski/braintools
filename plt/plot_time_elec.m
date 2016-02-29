@@ -33,7 +33,7 @@ clst = get_cluster(stat, opt.pval);
 
 % create mask:
 mask = zeros(size(stat.stat));
-col = zeros(length(clst), 3);
+% col = zeros(length(clst), 3);
 for c = 1:length(clst)
     mask(clst(c).boolmat) = c;
 end
