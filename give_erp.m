@@ -9,8 +9,7 @@ function erp = give_erp(EEG, chans, epoki, varargin)
 
 iscomp = any(strcmp('ica', varargin));
 
-% jeżeli pewne zmienne nie istnieją - 
-% ustawiamy wartości domyślne
+% defaults
 if ~exist('chans', 'var') || isempty(chans) || ...
 	(ischar(chans) && strcmp(chans, 'all'))
     chans = 1:EEG.nbchan;
@@ -22,7 +21,7 @@ if ischar(epoki)
     epoki = {epoki};
 end
 
-% jeżeli kanały podane zostały po nazwach 
+% if channels we given by name
 if ischar(chans)
 	chans = {chans};
 end
@@ -30,9 +29,9 @@ if iscell(chans)
 	chans = find_elec(EEG, chans);
 end
 
-% jeżeli podano epoki jako nazwę warunku
+% if epochs given as condition names
 if ischar(epoki) || iscell(epoki)
-	[temp, epoki] = find(epoch_centering_events(EEG, epoki));
+	[~, epoki] = find(epoch_centering_events(EEG, epoki));
 end
 
 % alarm if no such epochs
