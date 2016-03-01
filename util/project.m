@@ -3,7 +3,7 @@ classdef project < handle
     % TODOs:
     % [ ] - pull out valid_path from ICAw_path
     % [ ] - use valid_path in returning path
-    % [ ] - implement indexing so that proj('fig')
+    % [x] - implement indexing so that proj('fig')
     %       works ok
     %
     
@@ -68,9 +68,9 @@ classdef project < handle
             end
         end
 
-        function files = fls(obj, pthlabel, ext, expr)
+        function files = fls(obj, pthlabel, ext)
             hasext = exist('ext', 'var') && ~isempty(ext);
-            hasexp = exist('expr', 'var');
+            % hasexp = exist('expr', 'var');
 
             files = dir(obj.pth(pthlabel));
             files = files(~[files.isdir]);
