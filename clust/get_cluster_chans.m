@@ -1,4 +1,4 @@
-function chan = get_cluster_chans(clst, partic)
+function chan = get_cluster_chans(clst, partic, varargin)
 
 % return a list of channel indices that constitute
 % the cluster, given participation criterion.
@@ -8,6 +8,16 @@ function chan = get_cluster_chans(clst, partic)
 if ~exist('partic', 'var')
     partic = 0.33;
 end
+opt.time = false;
+if nargin > 2
+    opt = parse_arse(varargin, opt);
+end
 
-chan = find(mean(clst.boolmat(:, clst.samples), ...
+if ~opt.time
+    get_samples = 1:length(clst.samples);
+else
+    get_samples = cnt(find_range(clst.time, opt.time));
+end
+
+chan = find(mean(clst.boolmat(:, clst.samples(get_samples)), ...
 	2) >= partic);
