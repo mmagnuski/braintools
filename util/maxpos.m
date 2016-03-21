@@ -1,4 +1,8 @@
 function pos = maxpos(vect, n)
+% pos = maxpos(vect, n);
+%
+% return indices of n highest values in
+% vector vect
 
 if ~exist('n', 'var')
     n = 1;

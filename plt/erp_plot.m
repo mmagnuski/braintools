@@ -30,10 +30,14 @@ set(gcf, 'color', [1,1,1]);
 % add patches
 if ~isempty(opt.patch)
     hlfsamp = diff(EEG.times([1, 2])) / 2;
-    g = group(opt.patch);
-    % take only significant:
-    g = g(g(:,1) == 1, 2:3);
-    g = EEG.times(g);
+    if length(opt.patch) == length(EEG.times)
+        g = group(opt.patch);
+        % take only significant:
+        g = g(g(:,1) == 1, 2:3);
+        g = EEG.times(g);
+    else
+        g = opt.patch;
+    end
     g = [g(:,1) - hlfsamp, g(:,2) + hlfsamp];
     for ip = 1:size(g, 1)
         add_patch(g(ip,:), [0.9, 0.9, 0.9]);
