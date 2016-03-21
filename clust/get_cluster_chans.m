@@ -9,5 +9,6 @@ if ~exist('partic', 'var')
     partic = 0.33;
 end
 
-chan = find(mean(clst.boolmat(:, clst.samples), ...
-	2) >= partic);
+chan = mean(clst.boolmat(:, clst.samples), ...
+	2) >= partic;
+chan = clst.elecs(chan);
