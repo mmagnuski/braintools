@@ -66,7 +66,7 @@ scalelim = [min(min(stat.stat)), max(max(stat.stat))];
 
 % plot each timeslice
 for t = 1:size(twin.samples, 1)
-	
+
 	% get window indices and effect value
 	win  = twin.samples(t,1) : twin.samples(t,2);
 	effect = mean(stat.stat(:, win), 2);
@@ -94,7 +94,7 @@ for t = 1:size(twin.samples, 1)
 % 				'VerticalAlignment', 'bottom', ...
 		end
 	end
-	
+
 	% disect topoplot
 	h = topo_scrapper(ax(t));
 
