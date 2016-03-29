@@ -32,4 +32,4 @@ end
 
 chan = find(mean(clst.boolmat(:, clst.samples(get_samples)), ...
 	2) >= partic);
-chan = clst.elecs(chan);
+% chan = clst.elecs(chan);
