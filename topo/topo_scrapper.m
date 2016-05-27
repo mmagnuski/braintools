@@ -98,7 +98,13 @@ if ~isempty(ptch)
 else
     h.patch = [];
 end
-h.hggroup = chld(strcmp('hggroup', tps));
+mver = mat_version(true);
+
+if mver.y < 2014 || (mver.y == 2014) && (mver.l == 'a')
+    h.hggroup = chld(strcmp('hggroup', tps));
+else
+    h.hggroup = chld(strcmp('contour', tps));
+end
 
 % check text labels:
 tmp = findobj('parent', ax, 'type', 'text');
