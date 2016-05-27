@@ -19,7 +19,7 @@ opt.colors = [];
 opt.remove_chin = false;
 opt.remove_Cz = false;
 opt.order = true;
-
+opt.maskit = [];
 if ~isempty(varargin)
     opt = parse_arse(varargin, opt);
 end
@@ -67,9 +67,16 @@ if femp(opt, 'colors')
     maskopt.LineWidth = 1;
     maskopt.ClusterColor = opt.colors;
 end
-maskopt = struct_unroll(maskopt);
-[~, h] = maskitsweet(val, mask, maskopt{:});
 
+maskopt = struct_unroll(maskopt);
+
+% add opts from opt.maskopt
+if femp(opt, 'maskopt') && iscell(opt.maskopt)
+    maskopt = [maskopt, opt.maskopt];
+end
+
+[o, h] = maskitsweet(val, mask, maskopt{:});
+h.clim = o.mapping([1, end])';
 
 % finishing up
 % ------------
