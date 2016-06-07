@@ -939,22 +939,20 @@ if opt.PlotScale
     % similar to plotting scale in erpimage
     handles.colorbar = colorbar('peer', handles.axis);
     if ~opt.NoRGB
-        % label the colorbar appropriately (9 labels):
-        labind = round(linspace(1, opt.MapLen, 9));
-        % labind = round(linspace(1, outputs.cmaplen, 8));
+        [vals, pos] = find_ticklabels(outputs.mapping, 9);
         
-        % labels with precision up to two decimal places:
-        labs = round(outputs.mapping(labind)*100)/100;
-        % transform to cell of strings:
-        labs =  arrayfun(@(x) ['  ', num2str(x)], labs, 'uni', false);
-        % change Ticks location:
-        labind = labind + 0.5; labind(1) = 1;
-        labind(end) = labind(end) - 0.5;
         % set Ticks:
-        set(handles.colorbar, 'YTick', labind, 'YTickLabel',...
-            labs, 'LineWidth', 1, 'TickLength', [0.02 0.02], 'TickDir',...
+        set(handles.colorbar, 'YTick', pos, 'YTickLabel',...
+            vals, 'LineWidth', 1, 'TickLength', [0.02 0.02], 'TickDir',...
             'out', 'Layer', 'top', 'YLim', [1 outputs.cmaplen],...
             'Box', 'off');
+        % mask half of colorbar:
+        xlm = get(handles.colorbar, 'XLim');
+        hlf = xlm(1) + diff(xlm)/2;
+        ptch_h = patch('Parent', handles.colorbar, ...
+            'Vertices', [xlm(1), 1; hlf, 1; hlf, outputs.cmaplen;...
+            xlm(1), outputs.cmaplen], 'Faces', 1:4, 'EdgeColor', 'none',...
+            'FaceColor', opt.MaskColor / 255, 'FaceAlpha', opt.nosig(1));
     end
 end
 
