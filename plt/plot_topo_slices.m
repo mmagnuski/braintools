@@ -24,6 +24,9 @@ opt.markerlw      = 0.5;
 opt.toposhapelw   = 0.75;
 opt.topocontourlw = 0.1;
 opt.electreshold  = 0.2;
+opt.style         = 'fill';
+opt.numcontour    = 8;
+opt.gridscale     = 64;
 opt.freq = [];
 
 % check timeunits
@@ -74,9 +77,10 @@ for t = 1:size(twin.samples, 1)
 	% topoplot
 	axes(ax(t));
 	topoplot(effect, locs, ...
-		'style', 'fill', ...
-	    'numcontour', 8, ...
-	    'maplimits', scalelim);
+		'style', opt.style, ...
+	    'numcontour', opt.numcontour, ...
+	    'maplimits', scalelim, 'gridscale', ...
+        opt.gridscale);
 
 	% add title about time
     set(ax(t), 'units', 'normalized');
