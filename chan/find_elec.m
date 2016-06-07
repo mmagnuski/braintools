@@ -1,11 +1,20 @@
 function electrodes_id = find_elec(EEG, electrodes)
 
-% finds electrode indices from electrode labels
-% works both for EEGlab and FieldTrip formats
-% electrodes_id = eeg_findelec(EEG, electrodes)
-% where electrodes is a string or cell of strings
+% FIND_ELEC finds electrode indices from electrode labels.
 %
-% FIXHELPINFO
+% elec_idx = find_elec(EEG, electrodes)
+%
+% where `EEG` can be eeglab or fieldtrip data structure
+% or cell array of channel names and 
+% `electrodes` is a string or cell of strings
+% for example:
+% find_elec(EEG, 'Oz')
+% find_elec(EEG, {'Cz', 'P3', 'Fp'})
+% 
+% find_elec works both for EEGlab and FieldTrip formats
+% eeg = eeg2ftrip(EEG);
+% find_elec(eeg, {'Cz', 'P3', 'Fp'})
+%
 
 % ADD tolerance to absent electrodes
 
