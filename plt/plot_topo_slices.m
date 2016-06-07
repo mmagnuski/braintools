@@ -13,7 +13,7 @@ function plot_topo_slices(stat, clst, twin, ax, locs, varargin)
 % [ ] - check chan overlap
 
 % defaults
-pval     = 0.05;
+% pval     = 0.05;
 title_font_size = 8;
 opt.titles = true;
 
@@ -28,6 +28,9 @@ opt.style         = 'fill';
 opt.numcontour    = 8;
 opt.gridscale     = 64;
 opt.freq = [];
+opt.clim = [];
+opt.style = 'fill';
+opt.gridscale = 128;
 
 % check timeunits
 opt.timeunits = 'ms';
@@ -41,7 +44,7 @@ end
 
 % check dimensions of stat - if more than 2d - we need to reduce
 moredims = false;
-if ndims(stat.stat) > 2
+if ndims(stat.stat) > 2 %#ok<ISMAT>
 	moredims = true;
 	dims = strsep(stat.dimord, '_');
 	whichfreq = find(strcmp(dims, 'freq'));
@@ -63,9 +66,10 @@ if strcmp(opt.timeunits, 's')
 end
 
 % bothbool = clst{1}.boolmat | clst{2}.boolmat;
-% scalelim may be changed not to scale up to
-% max but sth below...
-scalelim = [min(min(stat.stat)), max(max(stat.stat))];
+% opt.clim controls limits of colormap
+if isempty(opt.clim)
+    opt.clim = [min(min(stat.stat)), max(max(stat.stat))];
+end
 
 % plot each timeslice
 for t = 1:size(twin.samples, 1)
@@ -75,12 +79,12 @@ for t = 1:size(twin.samples, 1)
 	effect = mean(stat.stat(:, win), 2);
 
 	% topoplot
-	axes(ax(t));
+	axes(ax(t)); %#ok<LAXES>
 	topoplot(effect, locs, ...
 		'style', opt.style, ...
 	    'numcontour', opt.numcontour, ...
-	    'maplimits', scalelim, 'gridscale', ...
-        opt.gridscale);
+	    'maplimits', opt.clim, ...
+        'gridscale', opt.gridscale);
 
 	% add title about time
     set(ax(t), 'units', 'normalized');
@@ -113,43 +117,43 @@ for t = 1:size(twin.samples, 1)
 	% TODO
 	% color electrodes with cluster
 	delete(h.elec_marks);
-	for c = 1:length(clst)
-		% find cluster-participating electrodes
-		if moredims
-			elecs = find(mean(clst(c).boolmat(:,win), 2) > opt.electreshold);
-		else
-			% ADD - if electreshold defined - 
-			% take mean and compare to tresh
-	        elecs = find(sum(clst(c).boolmat(:,win), 2) > 0);
-	    end
+    for c = 1:length(clst)
+        % find cluster-participating electrodes
+        if moredims
+            elecs = find(mean(clst(c).boolmat(:,win), 2) > opt.electreshold);
+        else
+            % ADD - if electreshold defined -
+            % take mean and compare to tresh
+            elecs = find(sum(clst(c).boolmat(:,win), 2) > 0);
+        end
 
-		if isempty(elecs)
-			continue
-		end
+        if isempty(elecs)
+            continue
+        end
 
-		% draw cluster electrode markers
-		lineh(c) = line(...
-			h.elec_pos(elecs, 1), ...
-			h.elec_pos(elecs, 2), ...
-			h.elec_pos(elecs, 3), ...
-			'marker', opt.markertype, ...
-			'linestyle', 'none', ...
-			'markerfacecolor', clst(c).color, ...
-			'markeredgecolor', clst(c).color, ...
-			'markersize', opt.markersize, ...
-			'linewidth', opt.markerlw);
+        % draw cluster electrode markers
+        lineh(c) = line(...
+            h.elec_pos(elecs, 1), ...
+            h.elec_pos(elecs, 2), ...
+            h.elec_pos(elecs, 3), ...
+            'marker', opt.markertype, ...
+            'linestyle', 'none', ...
+            'markerfacecolor', clst(c).color, ...
+            'markeredgecolor', clst(c).color, ...
+            'markersize', opt.markersize, ...
+            'linewidth', opt.markerlw); %#ok<AGROW,NASGU>
 
-		% draw the rest of elecs?
-	end
+        % draw the rest of elecs?
+    end
 
-	% move ears etc. below lines
-	% lineh(lineh == 0) = [];
-	% if ~isempty(lineh)
-	% 	chld = get(ax(t), 'Children');
-	% 	marks_in_chld = arrayfun(@(x) find(chld == x), lineh);
-	% 	chld(marks_in_chld) = [];
-	% 	chld = [lineh'; chld]; %#ok<AGROW>
-	% 	% chld = [chld; lineh']; %#ok<AGROW>
-	% 	set(ax(t), 'Children', chld);
-	% end
+    % move ears etc. below lines
+    % lineh(lineh == 0) = [];
+    % if ~isempty(lineh)
+    % 	chld = get(ax(t), 'Children');
+    % 	marks_in_chld = arrayfun(@(x) find(chld == x), lineh);
+    % 	chld(marks_in_chld) = [];
+    % 	chld = [lineh'; chld]; %#ok<AGROW>
+    % 	% chld = [chld; lineh']; %#ok<AGROW>
+    % 	set(ax(t), 'Children', chld);
+    % end
 end
