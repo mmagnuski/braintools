@@ -1,24 +1,26 @@
-function describe_clusters(stat, varargin)
+function describe_clusters(clst, varargin)
 
-ifneg = femp(stat, 'negclusters');
-ifpos = femp(stat, 'posclusters');
-ifclose = false;
+% describe clusters obtained with get_clusters
 
-probfld = {'prob', 'p'};
-if ifpos
-    goodf = isfield(stat.posclusters, probfld);
-end
-probfld = probfld(goodf);
-probfld = probfld{1};
+% notes
+% ifclose is used to track whether file needs to be closed
+
+% probfld = {'prob', 'p'};
+% if ifpos
+%     goodf = isfield(stat.posclusters, probfld);
+% end
+% probfld = probfld(goodf);
+% probfld = probfld{1};
 
 % stat field
-statfld = {'clusterstat', 'val'};
-if ifpos
-    goodf = isfield(stat.posclusters, statfld);
-end
-statfld = statfld(goodf);
-statfld = statfld{1};
+% statfld = {'clusterstat', 'val'};
+% if ifpos
+%     goodf = isfield(stat.posclusters, statfld);
+% end
+% statfld = statfld(goodf);
+% statfld = statfld{1};
 
+ifclose = false;
 if nargin > 1
 	% output file:
 	if ischar(varargin{1})
@@ -33,41 +35,25 @@ else
 	prnt = @(str, rst) fprintf(str, rst{:});
 end
 
-if ifpos
-	posnum = length(stat.posclusters);
-	posclst = stat.posclusters(1);
-    sigpos = sum([stat.posclusters.(probfld)] < 0.05);
-else
-	posnum = 0;
-	sigpos = 0;
-end
-if ifneg
-	negnum = length(stat.negclusters);
-	negclst = stat.negclusters(1);
-    signeg = sum([stat.negclusters.(probfld)] < 0.05);
-else
-	negnum = 0;
-	signeg = 0;
-end
+which_pos = strcmp('pos', {clst.pol});
+posnum = sum(which_pos);
+negnum = length(clst) - posnum;
 
 prnt('Number of clusters\n', {});
 prnt('------------------\n', {});
-prnt('all positive clusters: %d\n', {posnum});
-prnt('significant positive clusters: %d\n', {sigpos});
-prnt('all negative clusters: %d\n', {negnum});
-prnt('significant negative clusters: %d\n', {signeg});
+% prnt('all positive clusters: %d\n', {posnum});
+prnt('significant positive clusters: %d\n', {posnum});
+% prnt('all negative clusters: %d\n', {negnum});
+prnt('significant negative clusters: %d\n', {negnum});
 
-if ifpos
-prnt('\nmost significant positive cluster:\n', {});
-prnt('p value: %4.3f\n', {posclst.(probfld)});
-prnt('summary stat: %5.2f\n', {posclst.(statfld)});
+for c = 1:length(clst)
+    te = clst(c).timedges;
+    prnt('\n--Cluster %d--\n', {c});
+    prnt('polarity: %s\n', {clst(c).pol});
+    prnt('p value: %4.3f\n', {clst(c).prob});
+    prnt('time range: %4.3f - %4.3f s\n', {te(1), te(2)});
 end
 
-if ifneg
-prnt('\nmost significant negative cluster:\n', {});
-prnt('p value: %4.3f\n', {negclst.(probfld)});
-prnt('summary stat: %5.2f\n', {negclst.(statfld)});
-end
 
 if ifclose
 	fclose(fid);
