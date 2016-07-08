@@ -1,8 +1,9 @@
 function neighb = get_neighbours(captype)
 
-supported_caps = {'egi64', 'biosemi32'}; %, 'EasyCap64'};
+supported_caps = {'egi64', 'biosemi32', 'biosemi64'}; %, 'EasyCap64'};
 which_cap = strcmp(lower(captype), supported_caps);
-cap_neighbours = {'EGI64_Cz_neighbours.mat', 'BioSemi32_neighbours.mat'};
+cap_neighbours = {'EGI64_Cz_neighbours.mat', 'BioSemi32_neighbours.mat',...
+    'BioSemi64_neighbours.mat'};
 
 if ~any(which_cap)
     error('Unsupported cap type');
