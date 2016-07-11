@@ -322,10 +322,10 @@ classdef explore_data < handle
                     obj.opt.current_electrode,:,:));
             end
             if isempty(obj.opt.xaxis)
-                obj.opt.xaxis = 1:size(t_val, 2);
+                obj.opt.xaxis = 1:size(obj.t, 2);
             end
             if isempty(obj.opt.yaxis)
-                obj.opt.yaxis = 1:size(t_val, 1);
+                obj.opt.yaxis = 1:size(obj.t, 1);
             end
             mx = obj.opt.max_map;
             if obj.opt.proportional_scale
