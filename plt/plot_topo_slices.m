@@ -14,7 +14,6 @@ function plot_topo_slices(stat, clst, twin, ax, locs, varargin)
 
 % defaults
 % pval     = 0.05;
-title_font_size = 8;
 opt.titles = true;
 
 % marker definition
@@ -31,6 +30,7 @@ opt.freq = [];
 opt.clim = [];
 opt.style = 'fill';
 opt.gridscale = 128;
+opt.titlefontsize = 8;
 
 % check timeunits
 opt.timeunits = 'ms';
@@ -92,7 +92,7 @@ for t = 1:size(twin.samples, 1)
 		time_text = sprintf(timstr, ...
 			twin.times(t,1), twin.times(t,2));
 		title_h = title(time_text,...
-			'fontsize', title_font_size);
+			'fontsize', opt.titlefontsize);
 		if strcmp(opt.titles, 'below')
 			xl = get(ax(t), 'xlim');
             yl = get(ax(t), 'ylim');
