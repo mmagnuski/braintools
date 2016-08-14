@@ -942,12 +942,25 @@ if opt.PlotScale
         [vals, pos] = find_ticklabels(outputs.mapping, 9);
         
         % set Ticks:
-        set(handles.colorbar, 'YTick', pos, 'YTickLabel',...
-            vals, 'LineWidth', 1, 'TickLength', [0.02 0.02], 'TickDir',...
-            'out', 'Layer', 'top', 'YLim', [1 outputs.cmaplen],...
-            'Box', 'off');
-        % mask half of colorbar:
-        xlm = get(handles.colorbar, 'XLim');
+        matv = mat_version(true);
+        if (matv.y > 2014) || (matv.y == 2014 && strcmp(matv.l, 'b'))
+            cbar = handles.colorbar;
+            cbar.YTick = pos;
+            cbar.YTickLabel = vals;
+            cbar.LineWidth = 1;
+            cbar.TickLength = 0.02;
+            cbar.TickDirection = 'out';
+            % cbar.Layer = 'top';
+            cbar.YLim = [1 outputs.cmaplen];
+            cbar.Box = 'off';
+        else
+            set(handles.colorbar, 'YTick', pos, 'YTickLabel',...
+                vals, 'LineWidth', 1, 'TickLength', 0.02, 'TickDir',...
+                'out', 'Layer', 'top', 'YLim', [1 outputs.cmaplen],...
+                'Box', 'off');
+            % mask half of colorbar:
+            xlm = get(handles.colorbar, 'XLim');
+        end
         hlf = xlm(1) + diff(xlm)/2;
         ptch_h = patch('Parent', handles.colorbar, ...
             'Vertices', [xlm(1), 1; hlf, 1; hlf, outputs.cmaplen;...
