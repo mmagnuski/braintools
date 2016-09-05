@@ -45,8 +45,12 @@ end
 % add the objects that are common to all fieldboxes
 tmpchanlocs  = EEG.chanlocs;
 data.label   = { tmpchanlocs.labels };
-data.fsample = EEG.srate;
+data.fsample = double(EEG.srate);
 
+% in case set file was saved from python:
+if ~isa(EEG.times, 'double')
+    EEG.times = double(EEG.times);
+end
 
 data.elec.pnt   = zeros(length( EEG.chanlocs ), 3);
 for ind = 1:length( EEG.chanlocs )
@@ -91,10 +95,10 @@ switch fieldbox
           if ~(zeroev > length(EEG.urevent))
               noepinf = false;
           origlat = EEG.urevent(zeroev).latency;
-          try
-          data.sampleinfo(index, 1) = samptimes(1) + origlat;
-          data.sampleinfo(index, 2) = samptimes(end) + origlat;
-          lastsamp = data.sampleinfo(index, 2);
+          try %#ok<TRYNC>
+            data.sampleinfo(index, 1) = samptimes(1) + origlat;
+            data.sampleinfo(index, 2) = samptimes(end) + origlat;
+            lastsamp = data.sampleinfo(index, 2);
           end % catch - weird error with windowed data, empty origlat because
               % the urevent is probably bad, will have to look into
               % onesecepoch
@@ -130,6 +134,6 @@ catch %#ok<CTCH>
 end
 
 % add the version details of this function call to the configuration
-data.cfg.version.id   = '$Id: eeglab2fieldtrip.m,v 1.6 2009-07-02 23:39:29 arno Exp $';
+data.cfg.version.id   = 'eeg2ftrp.m';
 
 return
