@@ -45,8 +45,12 @@ end
 % add the objects that are common to all fieldboxes
 tmpchanlocs  = EEG.chanlocs;
 data.label   = { tmpchanlocs.labels };
-data.fsample = EEG.srate;
+data.fsample = double(EEG.srate);
 
+% in case set file was saved from python:
+if ~isa(EEG.times, 'double')
+    EEG.times = double(EEG.times);
+end
 
 data.elec.pnt   = zeros(length( EEG.chanlocs ), 3);
 for ind = 1:length( EEG.chanlocs )
