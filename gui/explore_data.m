@@ -69,6 +69,7 @@ classdef explore_data < handle
             obj.opt.clusters = [];
             obj.opt.clustermask = [];
             obj.opt.minchan = 0;
+            obj.opt.effect_names = [];
 
             obj.opt.max_map = 0.001;
             obj.opt.proportional_scale = true;
@@ -92,10 +93,20 @@ classdef explore_data < handle
             % plot electrodes
             if obj.dims > 2 % this could work for 2D too, based on stat
                 topoplot([], EEG.chanlocs, 'style', 'blank', ...
-                    'electrodes', 'labelpoint');
+                    'electrodes', 'on');
             else
-                topoplot([], EEG.chanlocs);
+                topoplot([], EEG.chanlocs, 'electrodes', 'on');
             end
+            if obj.dims > 3
+                obj.opt.current_effect = 1;
+                obj.opt.num_effects = size(t_val, 4);
+                if isempty(obj.opt.effect_names)
+                    obj.opt.effect_names = arrayfun(@(x) ...
+                        sprintf('effect_%d', x), 1:obj.opt.num_effects, ...
+                        'UniformOutput', false);
+                end
+            end
+
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', ...
                 @(o, e) obj.show_elec());
@@ -167,26 +178,26 @@ classdef explore_data < handle
                 'cluster', 'callback', @(o,e) obj.cluster());
             obj.h.tresh_box = uicontrol('parent', obj.h.f2, ...
                 'style', 'edit', 'units', 'normalized', ...
-                'position', [0.6, 0.01, 0.15, 0.065], 'string', ...
+                'position', [0.65, 0.01, 0.12, 0.065], 'string', ...
                 '10%', 'callback', @(o,e) obj.set_tresh());
             obj.h.minchan_box = uicontrol('parent', obj.h.f2, ...
                 'style', 'edit', 'units', 'normalized', ...
-                'position', [0.4, 0.01, 0.15, 0.065], 'string', ...
+                'position', [0.55, 0.01, 0.07, 0.065], 'string', ...
                 '0', 'callback', @(o,e) obj.set_minchan());
             % add arrows if more than 3 dimensions
             if obj.dims > 3
                 obj.h.left_button = uicontrol('parent', obj.h.f2, ...
-                'style', 'pushbutton', 'units', 'normalized', ...
-                'position', [0.6, 0.01, 0.15, 0.065], 'string', ...
-                '10%', 'callback', @(o,e) obj.set_tresh());
-            obj.h.right_button = uicontrol('parent', obj.h.f2, ...
-                'style', 'pushbutton', 'units', 'normalized', ...
-                'position', [0.4, 0.01, 0.15, 0.065], 'string', ...
-                '0', 'callback', @(o,e) obj.set_minchan());
-            obj.h.mid_text = uicontrol('parent', obj.h.f2, ...
-                'style', 'text', 'units', 'normalized', ...
-                'position', [0.4, 0.01, 0.15, 0.065], 'string', ...
-                '0', 'callback', @(o,e) obj.set_minchan());
+                    'style', 'pushbutton', 'units', 'normalized', ...
+                    'position', [0.05, 0.01, 0.05, 0.065], 'string', ...
+                    '<', 'callback', @(o,e) obj.change_effect(-1));
+                obj.h.right_button = uicontrol('parent', obj.h.f2, ...
+                    'style', 'pushbutton', 'units', 'normalized', ...
+                    'position', [0.35, 0.01, 0.05, 0.065], 'string', ...
+                    '>', 'callback', @(o,e) obj.change_effect(1));
+                obj.h.mid_text = uicontrol('parent', obj.h.f2, ...
+                    'style', 'text', 'units', 'normalized', ...
+                    'position', [0.15, 0.01, 0.15, 0.065], 'string', ...
+                    obj.opt.effect_names{1});
             end
         end
 
@@ -312,8 +323,13 @@ classdef explore_data < handle
                 x = obj.opt.xsel;
                 y = obj.opt.ysel;
 
-                mean_val = squeeze(nanmean(nanmean(...
-                    obj.t(y(1):y(2), x(1):x(2), :),1),2))';
+                if obj.dims == 3
+                    data = obj.t(y(1):y(2), x(1):x(2), :);
+                elseif obj.dims == 4
+                    data = obj.t(y(1):y(2), x(1):x(2), :, ...
+                        obj.opt.current_effect);
+                end
+                mean_val = squeeze(nanmean(nanmean(data, 1), 2))';
                 obj.refresh_topo(mean_val);
                 set(obj.h.f2, 'WindowButtonDownFcn', ...
                     @(o,e) obj.turn_selection_on());
@@ -327,6 +343,16 @@ classdef explore_data < handle
 %                 obj.refresh_effect();
 %             end
 %         end
+        function change_effect(obj, v)
+            neweff = min([obj.opt.num_effects, ...
+                max([1, obj.opt.current_effect + v])]);
+            if ~(obj.opt.current_effect == neweff)
+                obj.opt.current_effect = neweff;
+                set(obj.h.mid_text, 'string', ...
+                    obj.opt.effect_names{obj.opt.current_effect});
+                obj.refresh_effect();
+            end
+        end
 
         function refresh_effect(obj)
             cla(obj.h.ax2);
@@ -406,7 +432,12 @@ classdef explore_data < handle
             end
 
             % check if %
-            data = permute(obj.t, [3, 1, 2]);
+            if obj.dims == 3
+                data = permute(obj.t, [3, 1, 2]);
+            elseif obj.dims == 4
+                data = permute(obj.t(:, :, :, obj.opt.current_effect), ...
+                    [3, 1, 2]);
+            end
             ifperc = strfind(obj.opt.thresh, '%');
             if ifperc % TODO - if pos and neg!
                 val = obj.opt.thresh;
