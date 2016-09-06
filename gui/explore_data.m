@@ -1,6 +1,37 @@
 classdef explore_data < handle
 
     % simple interface for exploring multi-dim EEG data
+    %
+    % usage:
+    % obj = explore_data(EEG, stat);
+    %
+    % Compulsory arguments
+    % --------------------
+    % EEG : eeglab data structure
+    %    eeg data is used mostly to get channel locations for
+    %    topoplot
+    % stat : n-dimentional matrix
+    %    has to conform to following dimensions order:
+    %    * 3D - (n, m, channels)
+    %    * 4D - (n, m, channels, effects)
+    %
+    % Optional key-value arguments
+    % ----------------------------
+    % captype : string
+    %    String describing cap type.
+    % xaxis
+    % yaxis
+    % minchan
+    % proportional_scale
+    % max_map
+    % clusters
+    % clustermask
+
+    % TODO:
+    % - [ ] add back channel names
+    % - [ ] support for 2D?
+    % - [ ] ...
+
     properties
         h
         t
