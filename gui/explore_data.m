@@ -114,6 +114,7 @@ classdef explore_data < handle
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', ...
                 @(o, e) obj.show_elec());
+            set(obj.h.f1, 'ButtonDownFcn', @(o, e) obj.show_elec());
 
             obj.EEG = EEG;
             obj.t = t_val;
@@ -238,6 +239,15 @@ classdef explore_data < handle
             topoplot(val, obj.EEG.chanlocs, 'electrodes', 'on'); % 'chaninfo', self.EEG.chaninfo
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            set(obj.h.f1, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            set(obj.topo.hggroup, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            chldr = get(obj.h.ax1, 'Children');
+            chldr_types = get(chldr, 'type');
+            surface_obj = find(strcmp('surface', chldr_types));
+            if ~isempty(surface_obj)
+                surface_obj = chldr(surface_obj);
+                set(surface_obj, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            end
         end
 
         function show_elec(obj)
