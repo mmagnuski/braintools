@@ -135,13 +135,6 @@ classdef explore_data < handle
                 [0.92, 0.15, 0.06, 0.75], 'XTick', [], ...
                 'YTick', [], 'YLim', [0, obj.opt.max_val]);
 
-%             dropdown for effects
-%             obj.h.drpdwn = uicontrol('style', 'popupmenu' , 'string', ...
-%                 effect_names, 'units', ...
-%                 'normalized', 'position', ...
-%                 [0.3, 0.001, 0.2, 0.05], 'callback', ...
-%                 @(o, e) obj.change_effect(), 'value', 1);
-
             obj.refresh_effect();
 
             % find handle to the image
@@ -234,6 +227,7 @@ classdef explore_data < handle
             end
         end
 
+        % TODO: add option to set stable scale for topo too
         function refresh_topo(obj, val)
             if ishandle(obj.h.ax1)
                 axes(obj.h.ax1);
@@ -506,16 +500,11 @@ classdef explore_data < handle
                 end
             end
             booldata = obj.filter_bool(data >= thresh(1));
+
+            obj.opt.clusters = findcluster(booldata, ...
+                obj.opt.chanconn, obj.opt.minchan);
             if obj.opt.negative_values
                 booldata2 = obj.filter_bool(data <= thresh(2));
-            end
-
-            if ~obj.opt.negative_values
-                obj.opt.clusters = findcluster(booldata, ...
-                    obj.opt.chanconn, obj.opt.minchan);
-            else
-                obj.opt.clusters = findcluster(booldata, ...
-                    obj.opt.chanconn, obj.opt.minchan);
                 negclusters = findcluster(booldata2, ...
                     obj.opt.chanconn, obj.opt.minchan);
                 lastClstNum = max(obj.opt.clusters(:));
