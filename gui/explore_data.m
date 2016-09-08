@@ -397,28 +397,37 @@ classdef explore_data < handle
                 obj.opt.yaxis = 1:size(obj.t, 1);
             end
             mx = obj.opt.max_map;
+            sorted = sort(t(:));
+            sorted = sorted(~isnan(sorted));
+            t_len = length(sorted);
+
             if obj.opt.proportional_scale
-                mx = sort(t(:));
-                mx = mx(~isnan(mx));
-                tlen = length(mx);
-                mx = mx(round(tlen*0.99));
+                mx = sorted(round(t_len*0.99));
             end
-            if obj.opt.negative_values
-                mn = sort(t(:));
-                mn = mn(~isnan(mx));
-                tlen = length(mn);
-                minv = mn(max([1, round(tlen*0.01)]));
+            if obj.opt.negative_values && any(sorted < 0)
+                minv = sorted(max([1, round(t_len*0.01)]));
+                max_abs = max(abs([minv, mx]));
+                mx = max_abs; minv = -max_abs;
             else
                 minv = 0;
             end
 
             obj.opt.local_max_val = mx;
-            maskitsweet(t, msk, ...
+            obj.opt.local_min_val = minv;
+            if obj.opt.negative_values
+                maskitsweet(t, msk, ...
                 'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
                 'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
                 'nosig', 0.75, ...
-                'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap, ...
-                'MapEdge', 'lin', 'MapCent', []);
+                'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap);
+            else
+                maskitsweet(t, msk, ...
+                    'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
+                    'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
+                    'nosig', 0.75, ...
+                    'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap, ...
+                    'MapEdge', 'lin', 'MapCent', []);
+            end
             obj.opt.patch_on = false;
             obj.opt.patch = [];
 
