@@ -90,6 +90,10 @@ classdef explore_data < handle
             obj.opt.patch_start = [];
             obj.opt.patch_stop = [];
 
+            obj.opt.filter_thresh = 0;
+            obj.opt.filter_kernel = ones(3, 3);
+            obj.opt.filter_kernel(2, 2) = 0;
+
             % plot electrodes
             if obj.dims > 2 % this could work for 2D too, based on stat
                 topoplot([], EEG.chanlocs, 'style', 'blank', ...
@@ -184,6 +188,10 @@ classdef explore_data < handle
                 'style', 'edit', 'units', 'normalized', ...
                 'position', [0.55, 0.01, 0.07, 0.065], 'string', ...
                 '0', 'callback', @(o,e) obj.set_minchan());
+            obj.h.filter_box = uicontrol('parent', obj.h.f2, ...
+                'style', 'edit', 'units', 'normalized', ...
+                'position', [0.45, 0.01, 0.07, 0.065], 'string', ...
+                '', 'callback', @(o,e) obj.set_filter());
             % add arrows if more than 3 dimensions
             if obj.dims > 3
                 obj.h.left_button = uicontrol('parent', obj.h.f2, ...
@@ -354,6 +362,10 @@ classdef explore_data < handle
             end
         end
 
+        function set_filter(obj)
+            obj.opt.filter_thresh = str2num(get(obj.h.filter_box, 'string')); %#ok<ST2NM>
+        end
+
         function refresh_effect(obj)
             cla(obj.h.ax2);
             axes(obj.h.ax2);
@@ -413,6 +425,20 @@ classdef explore_data < handle
             obj.refresh_scale();
         end
 
+        function data = filter_bool(obj, data)
+            if obj.opt.filter_thresh < 1.
+                real_thresh = obj.opt.filter_thresh * sum(...
+                    sum(obj.opt.filter_kernel));
+            else
+                real_thresh = obj.opt.filter_thresh;
+            end
+            for ch = 1:size(data, 3)
+                data(:, :, ch) = data(:, :, ch) .* conv2(...
+                    double(data(:, :, ch)), obj.opt.filter_kernel, ...
+                    'same') >= real_thresh;
+            end
+        end
+
         function refresh_scale(obj)
             cla(obj.h.scale_axis);
             image(reshape(hot(256), [256, 1, 3]), ...
@@ -466,15 +492,18 @@ classdef explore_data < handle
                     thresh = [thresh, -val];
                 end
             end
+            booldata = obj.filter_bool(data >= thresh(1));
+            if obj.opt.negative_values
+                booldata2 = obj.filter_bool(data <= thresh(2));
+            end
 
             if ~obj.opt.negative_values
-                obj.opt.clusters = findcluster(data >= thresh(1), ...
+                obj.opt.clusters = findcluster(booldata, ...
                     obj.opt.chanconn, obj.opt.minchan);
             else
-
-                obj.opt.clusters = findcluster(data >= thresh(1), ...
+                obj.opt.clusters = findcluster(booldata, ...
                     obj.opt.chanconn, obj.opt.minchan);
-                negclusters = findcluster(data <= thresh(2), ...
+                negclusters = findcluster(booldata2, ...
                     obj.opt.chanconn, obj.opt.minchan);
                 lastClstNum = max(obj.opt.clusters(:));
                 negclusters = (negclusters + lastClstNum) .* uint32(negclusters > 0);
