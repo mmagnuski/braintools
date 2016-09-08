@@ -26,6 +26,9 @@ classdef explore_data < handle
     % max_map
     % clusters
     % clustermask
+    % xaxis_labels
+    % yaxis_labels
+    % effect_names
 
     % TODO:
     % - [ ] add back channel names
@@ -62,6 +65,8 @@ classdef explore_data < handle
             obj.opt.yaxis = [];
             obj.opt.maskx = [];
             obj.opt.masky = [];
+            obj.opt.xaxis_labels = [];
+            obj.opt.yaxis_labels = [];
 
             obj.opt.captype = 'EGI64';
             obj.opt.thresh = '10%';
@@ -434,6 +439,14 @@ classdef explore_data < handle
             end
             obj.opt.patch_on = false;
             obj.opt.patch = [];
+            if ~isempty(obj.opt.xaxis_labels)
+                set(obj.h.ax2, 'xtick', obj.opt.xaxis_labels{1});
+                set(obj.h.ax2, 'xticklabel', obj.opt.xaxis_labels{2});
+            end
+            if ~isempty(obj.opt.yaxis_labels)
+                set(obj.h.ax2, 'ytick', obj.opt.yaxis_labels{1});
+                set(obj.h.ax2, 'yticklabel', obj.opt.yaxis_labels{2});
+            end
 
             obj.refresh_scale();
         end
