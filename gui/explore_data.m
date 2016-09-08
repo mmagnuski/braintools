@@ -435,15 +435,19 @@ classdef explore_data < handle
         end
 
         function data = filter_bool(obj, data)
+            if obj.opt.filter_thresh == 0
+                return
+            end
             if obj.opt.filter_thresh < 1.
                 real_thresh = obj.opt.filter_thresh * sum(...
                     sum(obj.opt.filter_kernel));
             else
                 real_thresh = obj.opt.filter_thresh;
             end
-            for ch = 1:size(data, 3)
-                data(:, :, ch) = data(:, :, ch) .* conv2(...
-                    double(data(:, :, ch)), obj.opt.filter_kernel, ...
+            for ch = 1:size(data, 1)
+                slice = squeeze(data(ch, :, :));
+                data(ch, :, :) = slice .* conv2(...
+                    double(slice), obj.opt.filter_kernel, ...
                     'same') >= real_thresh;
             end
         end
