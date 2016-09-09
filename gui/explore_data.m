@@ -276,8 +276,8 @@ classdef explore_data < handle
 
             hold on;
             sc = scatter(obj.topo.elec_pos(chan_ind,1), ...
-                obj.topo.elec_pos(chan_ind,2), ...
-                'FaceColor', 'r');
+                obj.topo.elec_pos(chan_ind,2), 48, ...
+                'FaceColor', 'w');
             obj.opt.current_electrode_h = sc;
 
             obj.opt.current_electrode = chan_ind;
