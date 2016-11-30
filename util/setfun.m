@@ -42,9 +42,9 @@ for f = 1:length(fls)
 
 	% apply fun
 	if overwrite
-		EEG = feval(fun, EEG);
+		EEG = feval(fun, EEG); %#ok<NASGU>
 	else
-		out{f} = feval(fun, EEG);
+		out{f} = feval(fun, EEG); %#ok<AGROW>
 	end
 
 	% overwrite
