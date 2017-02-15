@@ -119,6 +119,7 @@ classdef explore_data < handle
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', ...
                 @(o, e) obj.show_elec());
+            set(obj.h.f1, 'ButtonDownFcn', @(o, e) obj.show_elec());
 
             obj.EEG = EEG;
             obj.t = t_val;
@@ -139,13 +140,6 @@ classdef explore_data < handle
             obj.h.scale_axis = axes('Parent', obj.h.f2, 'Position', ...
                 [0.92, 0.15, 0.06, 0.75], 'XTick', [], ...
                 'YTick', [], 'YLim', [0, obj.opt.max_val]);
-
-%             dropdown for effects
-%             obj.h.drpdwn = uicontrol('style', 'popupmenu' , 'string', ...
-%                 effect_names, 'units', ...
-%                 'normalized', 'position', ...
-%                 [0.3, 0.001, 0.2, 0.05], 'callback', ...
-%                 @(o, e) obj.change_effect(), 'value', 1);
 
             obj.refresh_effect();
 
@@ -239,6 +233,7 @@ classdef explore_data < handle
             end
         end
 
+        % TODO: add option to set stable scale for topo too
         function refresh_topo(obj, val)
             if ishandle(obj.h.ax1)
                 axes(obj.h.ax1);
@@ -249,6 +244,15 @@ classdef explore_data < handle
             topoplot(val, obj.EEG.chanlocs, 'electrodes', 'on'); % 'chaninfo', self.EEG.chaninfo
             obj.topo = topo_scrapper(gca);
             set(obj.topo.elec_marks, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            set(obj.h.f1, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            set(obj.topo.hggroup, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            chldr = get(obj.h.ax1, 'Children');
+            chldr_types = get(chldr, 'type');
+            surface_obj = find(strcmp('surface', chldr_types));
+            if ~isempty(surface_obj)
+                surface_obj = chldr(surface_obj);
+                set(surface_obj, 'ButtonDownFcn', @(o, e) obj.show_elec());
+            end
         end
 
         function show_elec(obj)
@@ -272,8 +276,8 @@ classdef explore_data < handle
 
             hold on;
             sc = scatter(obj.topo.elec_pos(chan_ind,1), ...
-                obj.topo.elec_pos(chan_ind,2), ...
-                'FaceColor', 'r');
+                obj.topo.elec_pos(chan_ind,2), 48, ...
+                'FaceColor', 'w');
             obj.opt.current_electrode_h = sc;
 
             obj.opt.current_electrode = chan_ind;
@@ -402,28 +406,37 @@ classdef explore_data < handle
                 obj.opt.yaxis = 1:size(obj.t, 1);
             end
             mx = obj.opt.max_map;
+            sorted = sort(t(:));
+            sorted = sorted(~isnan(sorted));
+            t_len = length(sorted);
+
             if obj.opt.proportional_scale
-                mx = sort(t(:));
-                mx = mx(~isnan(mx));
-                tlen = length(mx);
-                mx = mx(round(tlen*0.99));
+                mx = sorted(round(t_len*0.99));
             end
-            if obj.opt.negative_values
-                mn = sort(t(:));
-                mn = mn(~isnan(mx));
-                tlen = length(mn);
-                minv = mn(max([1, round(tlen*0.01)]));
+            if obj.opt.negative_values && any(sorted < 0)
+                minv = sorted(max([1, round(t_len*0.01)]));
+                max_abs = max(abs([minv, mx]));
+                mx = max_abs; minv = -max_abs;
             else
                 minv = 0;
             end
 
             obj.opt.local_max_val = mx;
-            maskitsweet(t, msk, ...
+            obj.opt.local_min_val = minv;
+            if obj.opt.negative_values
+                maskitsweet(t, msk, ...
                 'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
                 'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
                 'nosig', 0.75, ...
-                'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap, ...
-                'MapEdge', 'lin', 'MapCent', []);
+                'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap);
+            else
+                maskitsweet(t, msk, ...
+                    'FigH', obj.h.f2, 'AxH', obj.h.ax2, ...
+                    'Time', obj.opt.xaxis, 'Freq', obj.opt.yaxis, ...
+                    'nosig', 0.75, ...
+                    'CMin', minv, 'CMax', mx, 'CMap', obj.opt.cmap, ...
+                    'MapEdge', 'lin', 'MapCent', []);
+            end
             obj.opt.patch_on = false;
             obj.opt.patch = [];
             if ~isempty(obj.opt.xaxis_labels)
@@ -439,15 +452,19 @@ classdef explore_data < handle
         end
 
         function data = filter_bool(obj, data)
+            if obj.opt.filter_thresh == 0
+                return
+            end
             if obj.opt.filter_thresh < 1.
                 real_thresh = obj.opt.filter_thresh * sum(...
                     sum(obj.opt.filter_kernel));
             else
                 real_thresh = obj.opt.filter_thresh;
             end
-            for ch = 1:size(data, 3)
-                data(:, :, ch) = data(:, :, ch) .* conv2(...
-                    double(data(:, :, ch)), obj.opt.filter_kernel, ...
+            for ch = 1:size(data, 1)
+                slice = squeeze(data(ch, :, :));
+                data(ch, :, :) = slice .* conv2(...
+                    double(slice), obj.opt.filter_kernel, ...
                     'same') >= real_thresh;
             end
         end
@@ -506,16 +523,11 @@ classdef explore_data < handle
                 end
             end
             booldata = obj.filter_bool(data >= thresh(1));
+
+            obj.opt.clusters = findcluster(booldata, ...
+                obj.opt.chanconn, obj.opt.minchan);
             if obj.opt.negative_values
                 booldata2 = obj.filter_bool(data <= thresh(2));
-            end
-
-            if ~obj.opt.negative_values
-                obj.opt.clusters = findcluster(booldata, ...
-                    obj.opt.chanconn, obj.opt.minchan);
-            else
-                obj.opt.clusters = findcluster(booldata, ...
-                    obj.opt.chanconn, obj.opt.minchan);
                 negclusters = findcluster(booldata2, ...
                     obj.opt.chanconn, obj.opt.minchan);
                 lastClstNum = max(obj.opt.clusters(:));
