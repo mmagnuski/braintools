@@ -25,11 +25,10 @@ opt.topocontourlw = 0.1;
 opt.electreshold  = 0.2;
 opt.style         = 'fill';
 opt.numcontour    = 8;
-opt.gridscale     = 64;
+opt.gridscale     = 128;
 opt.freq = [];
 opt.clim = [];
 opt.style = 'fill';
-opt.gridscale = 128;
 opt.titlefontsize = 8;
 
 % check timeunits
