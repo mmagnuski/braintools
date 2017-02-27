@@ -67,8 +67,8 @@ end;
         
 switch fieldbox
   case 'preprocessing'
-      sampt = 1000/EEG.srate;
-      samptimes = EEG.times/sampt;
+      sampt = double(1000 / EEG.srate);
+      samptimes = double(EEG.times) / sampt;
       data.sampleinfo = zeros(EEG.trials,2);
       lastsamp = 0;
       
