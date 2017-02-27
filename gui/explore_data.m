@@ -12,18 +12,21 @@ classdef explore_data < handle
     %    topoplot
     % stat : n-dimentional matrix
     %    has to conform to following dimensions order:
-    %    * 3D - (n, m, channels)
+    %    * 3D - (n, m, channels) or (n, channels, effects) if effects
+    %                            is set to true
     %    * 4D - (n, m, channels, effects)
     %
     % Optional key-value arguments
     % ----------------------------
     % captype : string
     %    String describing cap type.
+    % effects
     % xaxis
     % yaxis
     % minchan
     % proportional_scale
     % max_map
+    % chanconn
     % clusters
     % clustermask
     % xaxis_labels
@@ -74,6 +77,7 @@ classdef explore_data < handle
             obj.opt.clusters = [];
             obj.opt.clustermask = [];
             obj.opt.minchan = 0;
+            obj.opt.effect = false;
             obj.opt.effect_names = [];
 
             obj.opt.max_map = 0.001;
@@ -106,9 +110,14 @@ classdef explore_data < handle
             else
                 topoplot([], EEG.chanlocs, 'electrodes', 'on');
             end
-            if obj.dims > 3
+            if obj.dims > 3 || obj.opt.effect
+                obj.opt.effect = true;
                 obj.opt.current_effect = 1;
-                obj.opt.num_effects = size(t_val, 4);
+                if obj.dims == 4
+                    obj.opt.num_effects = size(t_val, 4);
+                elseif obj.dims == 3
+                    obj.opt.num_effects = size(t_val, 3);
+                end
                 if isempty(obj.opt.effect_names)
                     obj.opt.effect_names = arrayfun(@(x) ...
                         sprintf('effect_%d', x), 1:obj.opt.num_effects, ...
@@ -192,7 +201,7 @@ classdef explore_data < handle
                 'position', [0.45, 0.01, 0.07, 0.065], 'string', ...
                 '', 'callback', @(o,e) obj.set_filter());
             % add arrows if more than 3 dimensions
-            if obj.dims > 3
+            if obj.dims > 3 || obj.opt.effect
                 obj.h.left_button = uicontrol('parent', obj.h.f2, ...
                     'style', 'pushbutton', 'units', 'normalized', ...
                     'position', [0.05, 0.01, 0.05, 0.065], 'string', ...
@@ -215,7 +224,7 @@ classdef explore_data < handle
         end
 
         function turn_selection_on(obj)
-            disp(get(obj.h.f2, 'selectiontype'));
+            % drag rectangle after cursor and update topo after release
             cursor_pos = get(obj.h.ax2, 'currentpoint');
             cursor_pos = cursor_pos(1,1:2);
             xlm = get(obj.h.ax2, 'XLim');
@@ -235,6 +244,7 @@ classdef explore_data < handle
 
         % TODO: add option to set stable scale for topo too
         function refresh_topo(obj, val)
+            % updates topo
             if ishandle(obj.h.ax1)
                 axes(obj.h.ax1);
                 cla(obj.h.ax1);
@@ -256,6 +266,8 @@ classdef explore_data < handle
         end
 
         function show_elec(obj)
+            % update main window after clicking on topo
+            %
             % the marks have this button callback:
             % tmpstr = get(gco, 'userdata');
             % set(gco, 'userdata', get(gco, 'string'));
@@ -281,7 +293,9 @@ classdef explore_data < handle
             obj.opt.current_electrode_h = sc;
 
             obj.opt.current_electrode = chan_ind;
-            obj.refresh_effect();
+            if ~(obj.dims == 2 ||(obj.dims == 3 && obj.opt.effect))
+                obj.refresh_effect();
+            end
         end
 
         function out = pos2vert(obj)
@@ -341,12 +355,20 @@ classdef explore_data < handle
                 y = obj.opt.ysel;
 
                 if obj.dims == 3
-                    data = obj.t(y(1):y(2), x(1):x(2), :);
+                    if obj.opt.effect
+                        temp_t = obj.t(:, :, obj.opt.current_effect)';
+                        mean_val = squeeze(nanmean(...
+                            temp_t(:, x(1):x(2)), 2))';
+                    else
+                        data = obj.t(y(1):y(2), x(1):x(2), :);
+                        mean_val = squeeze(nanmean(nanmean(data, 1), 2))';
+                    end
                 elseif obj.dims == 4
                     data = obj.t(y(1):y(2), x(1):x(2), :, ...
                         obj.opt.current_effect);
+                    mean_val = squeeze(nanmean(nanmean(data, 1), 2))';
                 end
-                mean_val = squeeze(nanmean(nanmean(data, 1), 2))';
+                
                 obj.refresh_topo(mean_val);
                 set(obj.h.f2, 'WindowButtonDownFcn', ...
                     @(o,e) obj.turn_selection_on());
@@ -381,8 +403,12 @@ classdef explore_data < handle
             if obj.dims == 4
                 t = squeeze(obj.t(:, :, obj.opt.current_electrode, ...
                     obj.opt.current_effect)); %#ok<*PROP>
-            else
-                t = obj.t(:, :, obj.opt.current_electrode);
+            elseif obj.dims == 3
+                if obj.opt.effect
+                    t = obj.t(:, :, obj.opt.current_effect)';
+                else
+                    t = obj.t(:, :, obj.opt.current_electrode);
+                end
             end
 
             % this should change
@@ -396,14 +422,23 @@ classdef explore_data < handle
             if isempty(obj.opt.clustermask)
                 msk = [];
             else
-                msk = squeeze(obj.opt.clustermask(...
-                    obj.opt.current_electrode,:,:));
+                if obj.dims == 3 && obj.opt.effect
+                    msk = squeeze(obj.opt.clustermask(:,:));
+                else
+                    msk = squeeze(obj.opt.clustermask(...
+                        obj.opt.current_electrode,:,:));
+                end
             end
             if isempty(obj.opt.xaxis)
                 obj.opt.xaxis = 1:size(obj.t, 2);
             end
             if isempty(obj.opt.yaxis)
                 obj.opt.yaxis = 1:size(obj.t, 1);
+            end
+            if obj.dims == 3 && obj.opt.effect
+                temp = obj.opt.xaxis;
+                obj.opt.xaxis = obj.opt.yaxis;
+                obj.opt.yaxis = temp;
             end
             mx = obj.opt.max_map;
             sorted = sort(t(:));
@@ -452,6 +487,7 @@ classdef explore_data < handle
         end
 
         function data = filter_bool(obj, data)
+            % currently works only for 3D (n, m, channels) data
             if obj.opt.filter_thresh == 0
                 return
             end
@@ -470,6 +506,8 @@ classdef explore_data < handle
         end
 
         function refresh_scale(obj)
+            % CHANGE update to reflect pos-neg too
+            % and the scale should work within effect, not across
             cla(obj.h.scale_axis);
             image(reshape(hot(256), [256, 1, 3]), ...
                 'Parent', obj.h.scale_axis, ...
@@ -489,7 +527,12 @@ classdef explore_data < handle
 
             % check if %
             if obj.dims == 3
-                data = permute(obj.t, [3, 1, 2]);
+                if obj.opt.effect
+                    data = permute(obj.t(:, :, obj.opt.current_effect), ...
+                        [2, 1]);
+                else
+                    data = permute(obj.t, [3, 1, 2]);
+                end
             elseif obj.dims == 4
                 data = permute(obj.t(:, :, :, obj.opt.current_effect), ...
                     [3, 1, 2]);

@@ -953,6 +953,7 @@ if opt.PlotScale
             % cbar.Layer = 'top';
             cbar.YLim = [1 outputs.cmaplen];
             cbar.Box = 'off';
+            xlm = cbar.XLim;
         else
             set(handles.colorbar, 'YTick', pos, 'YTickLabel',...
                 vals, 'LineWidth', 1, 'TickLength', [0.02, 0.02], ...
