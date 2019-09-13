@@ -945,13 +945,22 @@ if opt.PlotScale
         matv = mat_version(true);
         if (matv.y > 2014) || (matv.y == 2014 && strcmp(matv.l, 'b'))
             cbar = handles.colorbar;
-            cbar.YTick = pos;
+            
+            % sometimes colorbar limits are from 0 - 1 (don't know why)
+            if all(cbar.Limits == [0, 1])
+                cbar.YTick = pos / length(outputs.mapping);
+            else
+                cbar.YTick = pos;
+            end
+
             cbar.YTickLabel = vals;
             cbar.LineWidth = 1;
             cbar.TickLength = 0.02;
             cbar.TickDirection = 'out';
             % cbar.Layer = 'top';
-            cbar.YLim = [1 outputs.cmaplen];
+            if ~all(cbar.Limits == [0, 1])
+                cbar.YLim = [1 outputs.cmaplen];
+            end
             cbar.Box = 'off';
             xlm = cbar.XLim;
         else
@@ -962,11 +971,18 @@ if opt.PlotScale
             % mask half of colorbar:
             xlm = get(handles.colorbar, 'XLim');
         end
-        hlf = xlm(1) + diff(xlm)/2;
-        ptch_h = patch('Parent', handles.colorbar, ...
-            'Vertices', [xlm(1), 1; hlf, 1; hlf, outputs.cmaplen;...
-            xlm(1), outputs.cmaplen], 'Faces', 1:4, 'EdgeColor', 'none',...
-            'FaceColor', opt.MaskColor / 255, 'FaceAlpha', opt.nosig(1));
+        
+        if (matv.y > 2014) || (matv.y == 2014 && strcmp(matv.l, 'b'))
+            % no idea how to add patch to colorbar...
+            disp('No shading for colorbar on your matlab version');
+        else
+            hlf = xlm(1) + diff(xlm)/2;
+            ptch_h = patch('Parent', handles.colorbar, ...
+                'Vertices', [xlm(1), 1; hlf, 1; hlf, outputs.cmaplen;...
+                xlm(1), outputs.cmaplen], 'Faces', 1:4, 'EdgeColor', ...
+                'none', 'FaceColor', opt.MaskColor / 255, 'FaceAlpha', ...
+                opt.nosig(1));
+        end
     end
 end
 

@@ -1,12 +1,13 @@
 function eeg_path(type, varargin)
 
 % adds path to eeglab functions
+%
 % ADDING PATH:
 % eeg_path(1);
 % OR: eeg_path('add');
-% (as for now this is just code copied from
-% EEGlab's eeglab.m, in the future it will 
-% be more elegant)
+% (as for now this is just code copied from EEGlab's eeglab.m, in the
+%  future it might be more elegant)
+%
 % REMOVING PATH:
 % eeg_path(2);
 % OR: eeg_path('rem');
@@ -14,10 +15,7 @@ function eeg_path(type, varargin)
 
 % TODOs:
 % [ ] restructure
-% [X] one function for adding and removing 
-% [ ] persistent option? (what was added before)
 % [ ] remove globals option (de-global)
-% [X] removing eeglab paths
 % [X] eeg_path(1) - add; eeg_path(2) - remove;
 % [ ] toolbox paths - check if added. If not:
 %     ADD and option for this
@@ -47,7 +45,7 @@ if isempty(eeglabpath)
 end
 % if its the current directory:
 if strcmpi(eeglabpath, './') || strcmpi(eeglabpath, '.\'),...
-        eeglabpath = [ pwd filesep ]; end;
+        eeglabpath = [ pwd filesep ]; end
 
 switch type
     case 1
@@ -72,7 +70,7 @@ switch type
             
             p = eeglabpath;
             % if base, then reformat:
-            if strcmpi(p, './') || strcmpi(p, '.\'), p = [ pwd filesep ]; end;
+            if strcmpi(p, './') || strcmpi(p, '.\'), p = [ pwd filesep ]; end
             dircontent  = dir([ p 'external' ]);
             dircontent  = { dircontent.name };
             for index = 1:length(dircontent)
@@ -89,9 +87,9 @@ switch type
                         % biosigflag = 1;
                     elseif exist([p 'external' filesep dircontent{index}]) == 7 %#ok<EXIST>
                         addpathifnotinlist([p 'external' filesep dircontent{index}]);
-                    end;
-                end;
-            end;
+                    end
+                end
+            end
         end
         
     case 2
@@ -119,7 +117,7 @@ function aadpathifnotexist(newpath, functionname)
 tmpp = which(functionname);
 if isempty(tmpp)
     addpath(newpath);
-end;
+end
 
 function myaddpath(eeglabpath, functionname, pathtoadd)
 
@@ -127,18 +125,18 @@ tmpp = which(functionname);
 tmpnewpath = [ eeglabpath pathtoadd ];
 if ~isempty(tmpp)
     tmpp = tmpp(1:end-length(functionname));
-    if length(tmpp) > length(tmpnewpath), tmpp = tmpp(1:end-1); end; % remove trailing filesep
-    if length(tmpp) > length(tmpnewpath), tmpp = tmpp(1:end-1); end; % remove trailing filesep
+    if length(tmpp) > length(tmpnewpath), tmpp = tmpp(1:end-1); end % remove trailing filesep
+    if length(tmpp) > length(tmpnewpath), tmpp = tmpp(1:end-1); end % remove trailing filesep
     %disp([ tmpp '     |        ' tmpnewpath '(' num2str(~strcmpi(tmpnewpath, tmpp)) ')' ]);
     if ~strcmpi(tmpnewpath, tmpp)
         warning('off', 'MATLAB:dispatcher:nameConflict');
         addpath(tmpnewpath);
         warning('on', 'MATLAB:dispatcher:nameConflict');
-    end;
+    end
 else
     %disp([ 'Adding new path ' tmpnewpath ]);
     addpathifnotinlist(tmpnewpath);
-end;
+end
 
 % add path only if it is not already in the list
 % ----------------------------------------------
@@ -149,17 +147,17 @@ if strcmpi(comp(1:2), 'PC')
     newpathtest = [ newpath ';' ];
 else
     newpathtest = [ newpath ':' ];
-end;
+end
 if ismatlab
     p = matlabpath;
 else p = path;
-end;
+end
 ind = strfind(p, newpathtest);
 if isempty(ind)
     if exist(newpath) == 7 %#ok<EXIST>
         addpath(newpath);
-    end;
-end;
+    end
+end
 
 % required here because path not added yet
 % to the admin folder
@@ -170,4 +168,4 @@ if v(1) > '4'
     res = 1;
 else
     res = 0;
-end;
+end
