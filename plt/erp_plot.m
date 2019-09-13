@@ -7,6 +7,8 @@ end
 
 opt.patch = [];
 opt.color = [];
+opt.gridcolor = [0.75, 0.75, 0.75];
+opt.gridwidth = 2;
 if nargin > 2
     opt = parse_arse(varargin, opt);
 end
@@ -19,11 +21,11 @@ else
 end
 hold on
 h.xline = plot(EEG.times([1, end]), [0, 0], ...
-	'Linewidth', 2, 'color', [0.75, 0.75, 0.75]);
+	'Linewidth', opt.gridwidth, 'color', opt.gridcolor);
 uistack(h.xline, 'bottom');
 ylm = get(gca, 'ylim');
 h.yline = plot([0, 0], ylm, ...
-	'Linewidth', 2, 'color', [0.75, 0.75, 0.75]);
+	'Linewidth', opt.gridwidth, 'color', opt.gridcolor);
 uistack(h.yline, 'bottom');
 set(gcf, 'color', [1,1,1]);
 

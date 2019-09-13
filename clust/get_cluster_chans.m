@@ -1,7 +1,8 @@
 function chan = get_cluster_chans(clst, partic, varargin)
 
 % return a list of channel indices that constitute
-% the cluster, given percentage participation criterion.
+% the cluster, given percentage participation criterion
+% (in the time domain).
 %
 % usage:
 % chan = get_cluster_chans(clst) % default 33% criterion
